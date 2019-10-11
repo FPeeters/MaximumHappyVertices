@@ -51,19 +51,22 @@ Graph::Graph(const std::string &fileName) : nbColors(0) {
     int preColorCounter = 0;
     for (unsigned int i = 0; i < nbNodes; ++i) {
         if (preColorCounter != preColoring.size()) {
-
-        }
-        const auto preColor = preColoring[preColorCounter];
-        if (preColor.first == i) {
-            addNode(preColor.second);
-            ++preColorCounter;
-        } else if (preColor.first < i) {
-            throw runtime_error("A node was colored multiple times");
+            const auto preColor = preColoring[preColorCounter];
+            if (preColor.first == i) {
+                addNode(preColor.second);
+                ++preColorCounter;
+            } else if (preColor.first < i)
+                throw runtime_error("A node was colored multiple times");
         }
         addNode();
     }
 
+    if (preColorCounter != preColoring.size())
+        throw runtime_error("A precoloring was given for a node with an index out of bounds");
 
-
-
+    for (auto edge : edges) {
+        if (hasEdge(edge.first, edge.second))
+            throw runtime_error("An edge was specified multiple times");
+        addEdge(edge.first, edge.second);
+    }
 }

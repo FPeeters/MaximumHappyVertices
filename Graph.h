@@ -66,6 +66,8 @@ public:
     }
 
     inline void addEdge(unsigned int from, unsigned int to) {
+        if (from >= nbNodes || to >= nbNodes)
+            throw std::runtime_error("Node index for edge out of bounds");
         nodes[from].edges.push_back(to);
         nodes[to].edges.push_back(from);
     }
