@@ -1,0 +1,75 @@
+#ifndef MAXHAPPYVERTS_GRAPH_H
+#define MAXHAPPYVERTS_GRAPH_H
+
+#include <vector>
+#include <algorithm>
+#include <string>
+
+class Graph {
+public:
+    typedef std::vector<unsigned int> edgesType;
+
+    struct Node {
+        unsigned int color;
+        bool preColored;
+        edgesType edges;
+
+        explicit Node(unsigned int color) : color(color), preColored(color == 0) {};
+    };
+
+    unsigned int nbNodes;
+    unsigned int nbColors;
+    std::vector<Node> nodes;
+
+    explicit Graph(unsigned int nbColors) : nbNodes(0), nbColors(nbColors) {};
+
+    explicit Graph(const std::string &fileName);
+
+    inline Node getNode(unsigned int i) {
+        return nodes[i];
+    }
+
+    inline unsigned int getColor(unsigned int i) {
+        return nodes[i].color;
+    }
+
+    inline edgesType getEdges(unsigned int i) {
+        return nodes[i].edges;
+    }
+
+    inline bool isPreColored(unsigned int i) {
+        return nodes[i].preColored;
+    }
+
+
+    inline bool hasEdge(unsigned int first, unsigned int second) {
+        edgesType &edges = nodes[first].edges;
+        return std::find(edges.begin(), edges.end(), second) != edges.end();
+    }
+
+
+    inline void color(unsigned int i, unsigned int color) {
+        Node node = nodes[i];
+        if (node.preColored)
+            throw std::runtime_error("Cannot change color of precolored nodes");
+        if (color > nbColors)
+            throw std::runtime_error("Color out of bounds");
+        node.color = color;
+    }
+
+    inline void addNode(unsigned int color = 0) {
+        if (color > nbColors)
+            throw std::runtime_error("Color out of bounds");
+        Node node(color);
+        nodes.push_back(node);
+        nbNodes++;
+    }
+
+    inline void addEdge(unsigned int from, unsigned int to) {
+        nodes[from].edges.push_back(to);
+        nodes[to].edges.push_back(from);
+    }
+
+};
+
+#endif //MAXHAPPYVERTS_GRAPH_H
