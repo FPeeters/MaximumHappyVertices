@@ -6,21 +6,24 @@
 #include <string>
 
 class Graph {
-public:
+
     typedef std::vector<unsigned int> edgesType;
 
+public:
     struct Node {
         unsigned int color;
         bool preColored;
         edgesType edges;
 
-        explicit Node(unsigned int color) : color(color), preColored(color == 0) {};
+        explicit Node(unsigned int color) : color(color), preColored(color != 0) {};
     };
 
+private:
     unsigned int nbNodes;
     unsigned int nbColors;
     std::vector<Node> nodes;
 
+public:
     explicit Graph(unsigned int nbColors) : nbNodes(0), nbColors(nbColors) {};
 
     explicit Graph(const std::string &fileName);
