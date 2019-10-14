@@ -15,6 +15,7 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
     int fileNbNodes = 0, nbEdges = 0;
     vector<pair<unsigned int, unsigned int>> edges;
     vector<pair<unsigned int, unsigned int>> preColoring;
+    unsigned int temp1 = 0, temp2 = 0;
 
     while (!inStream.eof()) {
         inStream.get(c);
@@ -28,14 +29,12 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
                 inStream >> fileNbNodes >> nbEdges >> nbColors;
                 break;
             case 'e':
-                unsigned int from, to;
-                inStream >> from >> to;
-                edges.emplace_back(from - 1, to - 1);
+                inStream >> temp1 >> temp2;
+                edges.emplace_back(temp1 - 1, temp2 - 1);
                 break;
             case 'n':
-                unsigned int node, color;
-                inStream >> node >> color;
-                preColoring.emplace_back(node - 1, color);
+                inStream >> temp1 >> temp2;
+                preColoring.emplace_back(temp1 - 1, temp2);
                 break;
             case 'c':
                 inStream.putback(c);
@@ -74,4 +73,21 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
             throw runtime_error("An edge was specified multiple times");
         addEdge(edge.first, edge.second);
     }
+}
+
+unsigned int Graph::getHappyVertices() const {
+    unsigned int count = 0;
+    bool happy;
+    for (const Node &node: nodes) {
+        happy = true;
+        for (unsigned int adj: node.edges) {
+            if (node.color != getColor(adj)) {
+                happy = false;
+                break;
+            }
+        }
+        if (happy)
+            ++count;
+    }
+    return count;
 }

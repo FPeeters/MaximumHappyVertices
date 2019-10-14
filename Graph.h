@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <stdexcept>
 
 class Graph {
 
@@ -28,31 +29,39 @@ public:
 
     explicit Graph(const std::string &fileName);
 
-    inline Node getNode(unsigned int i) {
+    inline Node getNode(unsigned int i) const {
         return nodes[i];
     }
 
-    inline unsigned int getColor(unsigned int i) {
+    inline unsigned int getColor(unsigned int i) const {
         return nodes[i].color;
     }
 
-    inline edgesType getEdges(unsigned int i) {
+    inline edgesType getEdges(unsigned int i) const {
         return nodes[i].edges;
     }
 
-    inline bool isPreColored(unsigned int i) {
+    inline bool isPreColored(unsigned int i) const {
         return nodes[i].preColored;
     }
 
+    inline unsigned int getNbColors() const {
+        return nbColors;
+    }
 
-    inline bool hasEdge(unsigned int first, unsigned int second) {
-        edgesType &edges = nodes[first].edges;
+    inline unsigned int getNbNodes() const {
+        return nbNodes;
+    }
+
+
+    inline bool hasEdge(unsigned int first, unsigned int second) const {
+        const edgesType &edges = nodes[first].edges;
         return std::find(edges.begin(), edges.end(), second) != edges.end();
     }
 
 
     inline void color(unsigned int i, unsigned int color) {
-        Node node = nodes[i];
+        Node &node = nodes[i];
         if (node.preColored)
             throw std::runtime_error("Cannot change color of precolored nodes");
         if (color > nbColors)
@@ -74,6 +83,8 @@ public:
         nodes[from].edges.push_back(to);
         nodes[to].edges.push_back(from);
     }
+
+    unsigned int getHappyVertices() const;
 
 };
 
