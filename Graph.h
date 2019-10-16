@@ -6,6 +6,8 @@
 #include <string>
 #include <stdexcept>
 
+static const std::string COLORS[11] {"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia", "cornflowerblue", "aqua", "peachpuff"};
+
 class Graph {
 
     typedef std::vector<unsigned int> edgesType;
@@ -86,6 +88,7 @@ public:
 
     unsigned int getHappyVertices() const;
 
+    void writeToDot(const std::string &filename) const;
 };
 
 #endif //MAXHAPPYVERTS_GRAPH_H

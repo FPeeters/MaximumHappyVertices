@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <sstream>
 #include "Graph.h"
 
 using namespace std;
@@ -90,4 +91,39 @@ unsigned int Graph::getHappyVertices() const {
             ++count;
     }
     return count;
+}
+
+void Graph::writeToDot(const std::string &filename) const {
+    ofstream out;
+    out.open(filename + ".dot");
+    if (out.fail()) throw runtime_error("Failed to open file");
+    out << "graph {" << endl;
+    out << "graph [overlap=false]" << endl;
+    out << "node [shape=point,colorscheme=svg]" << endl;
+
+    for (unsigned int node=0; node < nbNodes; ++node) {
+        out << "\tn" << node << " [color=" << COLORS[getColor(node)] << "]" << endl;
+    }
+
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        bool first = true;
+        for (unsigned int adj: getEdges(node)) {
+            if (adj > node) {
+                if (first) {
+                    out << "\t n" << node << " -- { ";
+                    first = false;
+                }
+                out << " n" << adj << " ";
+            }
+        }
+        if (!first)
+            out << "}" << endl;
+    }
+
+    out << "}" << endl;
+    out.close();
+
+    ostringstream cmd;
+    cmd << "sfdp " << filename << ".dot -Tpng -o" << filename << ".png";
+    system(("sfdp " + filename + ".dot -Tpng -o" + filename + ".png").c_str());
 }
