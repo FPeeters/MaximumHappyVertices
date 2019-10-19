@@ -30,6 +30,31 @@ Graph generateNeighbour(const Graph &graph, Rng &rng) {
     return newGraph;
 }
 
+std::vector<Group> generateGroups(const Graph &graph) {
+    std::vector<Group> groups;
+    int group[graph.getNbNodes()];
+    int groupCounter = 0;
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        if (graph.isPreColored(node)) {
+            group[node] = -1;
+            continue;
+        }
+        if (group[node] != 0)
+            continue;
+
+        Group newGroup(graph.getColor(node), node);
+        group[node] = ++groupCounter;
+        for (unsigned int adj: graph.getEdges(node)) {
+            if (graph.getColor(adj) != newGroup.color || group[adj] != 0)
+                continue;
+            group[adj] = groupCounter;
+            newGroup.nodes.push_back(adj);
+        }
+        groups.push_back(newGroup);
+    }
+    return groups;
+}
+
 double swapProbability(unsigned int oldEnergy, unsigned int newEnergy, double temperature) {
     if (newEnergy > oldEnergy)
         return 1;
@@ -44,6 +69,8 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
     Rng rng = Rng(seed);
     std::uniform_real_distribution<double> swapDistr(0,1);
     initRandomColoring(graph, rng);
+
+    generateGroups(graph);
 
     int maxIter = 10000;
     double temperature = 500;

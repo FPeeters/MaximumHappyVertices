@@ -41,6 +41,8 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
                 inStream.putback(c);
                 inStream.get(line, 512, '\n');
                 break;
+            case '\n':
+                break;
             default:
                 throw runtime_error("Undefined line control character");
         }
