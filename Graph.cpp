@@ -101,10 +101,13 @@ void Graph::writeToDot(const std::string &filename) const {
     if (out.fail()) throw runtime_error("Failed to open file");
     out << "graph {" << endl;
     out << "graph [overlap=false]" << endl;
-    out << "node [shape=point,colorscheme=svg]" << endl;
+    out << "node [style=filled,width=0.05,label=\"\",colorscheme=svg,fixedsize=true]" << endl;
 
     for (unsigned int node=0; node < nbNodes; ++node) {
-        out << "\tn" << node << " [color=" << COLORS[getColor(node)] << "]" << endl;
+        if (isPreColored(node))
+            out << "\tn" << node << " [shape=square,color=" << COLORS[getColor(node)] << "]" << endl;
+        else
+            out << "\tn" << node << " [shape=circle,color=" << COLORS[getColor(node)] << "]" << endl;
     }
 
     for (unsigned int node = 0; node < nbNodes; ++node) {

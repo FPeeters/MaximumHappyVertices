@@ -1,5 +1,7 @@
 #include "SimulatedAnnealing.h"
 #include <random>
+#include <queue>
+#include <cstring>
 
 typedef std::mt19937_64 Rng;
 
@@ -11,28 +13,10 @@ void initRandomColoring(Graph &graph, Rng &rng) {
     }
 }
 
-Graph generateNeighbour(const Graph &graph, Rng &rng) {
-    Graph newGraph = graph;
-
-    std::uniform_int_distribution<unsigned int> nodeDistr(0, graph.getNbNodes() - 1);
-    unsigned int node;
-    do {
-        node = nodeDistr(rng);
-    } while (graph.isPreColored(node));
-
-    std::uniform_int_distribution<unsigned int> colorDistr(1, graph.getNbColors());
-    unsigned int color;
-    do {
-        color = colorDistr(rng);
-    } while (graph.getColor(node) == color);
-
-    newGraph.color(node, color);
-    return newGraph;
-}
-
 std::vector<Group> generateGroups(const Graph &graph) {
     std::vector<Group> groups;
     int group[graph.getNbNodes()];
+    memset(&group, 0, sizeof(int) * graph.getNbNodes());
     int groupCounter = 0;
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (graph.isPreColored(node)) {
@@ -44,15 +28,55 @@ std::vector<Group> generateGroups(const Graph &graph) {
 
         Group newGroup(graph.getColor(node), node);
         group[node] = ++groupCounter;
-        for (unsigned int adj: graph.getEdges(node)) {
-            if (graph.getColor(adj) != newGroup.color || group[adj] != 0)
-                continue;
-            group[adj] = groupCounter;
-            newGroup.nodes.push_back(adj);
+        std::queue<unsigned int> toCheck;
+        toCheck.push(node);
+
+        while (!toCheck.empty()) {
+            const unsigned int check = toCheck.front();
+            toCheck.pop();
+            for (unsigned int adj: graph.getEdges(check)) {
+                if (graph.getColor(adj) != newGroup.color)
+                    newGroup.adjColors.insert(graph.getColor(adj));
+
+                if (graph.getColor(adj) != newGroup.color || group[adj] != 0)
+                    continue;
+                if (graph.isPreColored(adj)) {
+                    group[adj] = -1;
+                    continue;
+                }
+
+                group[adj] = groupCounter;
+                newGroup.nodes.push_back(adj);
+                toCheck.push(adj);
+            }
         }
-        groups.push_back(newGroup);
+        if (!newGroup.adjColors.empty())
+            groups.push_back(newGroup);
     }
     return groups;
+}
+
+Graph generateNeighbour(const Graph &graph, Rng &rng) {
+    const std::vector<Group> groups = generateGroups(graph);
+
+    Graph newGraph = graph;
+
+    std::uniform_int_distribution<unsigned int> nodeDistr(0, groups.size() - 1);
+    const Group group = groups[nodeDistr(rng)];
+
+    std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
+    unsigned int nbColor = colorDistr(rng);
+    auto it = group.adjColors.begin();
+    for (; nbColor != 0; --nbColor) {
+        it++;
+    }
+    unsigned int color = *it;
+
+    for (unsigned int node: group.nodes) {
+        newGraph.color(node, color);
+    }
+
+    return newGraph;
 }
 
 double swapProbability(unsigned int oldEnergy, unsigned int newEnergy, double temperature) {
@@ -70,9 +94,7 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
     std::uniform_real_distribution<double> swapDistr(0,1);
     initRandomColoring(graph, rng);
 
-    generateGroups(graph);
-
-    int maxIter = 10000;
+    int maxIter = 1000;
     double temperature = 500;
 
     const unsigned int nodes = graph.getNbNodes();
