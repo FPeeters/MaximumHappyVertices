@@ -58,7 +58,8 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
             if (preColor.first == i) {
                 addNode(preColor.second);
                 ++preColorCounter;
-                preColor = preColoring[preColorCounter];
+				if (preColorCounter < preColoring.size())
+					preColor = preColoring[preColorCounter];
                 continue;
             } else if (preColor.first < i)
                 throw runtime_error("A node was colored multiple times");
