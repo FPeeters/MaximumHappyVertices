@@ -6,7 +6,7 @@
 int main() {
     Graph graph("graph.txt");
 
-    unsigned int happy = simulatedAnnealing(graph, 1234);
+    unsigned int happy = simulatedAnnealing(graph, 123);
 
     std::cout << happy << std::endl;
 

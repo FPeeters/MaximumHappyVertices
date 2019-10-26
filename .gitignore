@@ -36,4 +36,3 @@ cmake-build-debug/
 
 *.png
 *.dot
-progress.txt
