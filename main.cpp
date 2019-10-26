@@ -4,7 +4,7 @@
 #include "SimulatedAnnealing.h"
 
 int main() {
-    Graph graph("graph.txt");
+    Graph graph("../../../graph.txt");
 
     unsigned int happy = simulatedAnnealing(graph, 123);
 

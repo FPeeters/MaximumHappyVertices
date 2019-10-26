@@ -15,8 +15,7 @@ void initRandomColoring(Graph &graph, Rng &rng) {
 
 std::vector<Group> generateGroups(const Graph &graph) {
     std::vector<Group> groups;
-    int group[graph.getNbNodes()];
-    memset(&group, 0, sizeof(int) * graph.getNbNodes());
+    int* group = (int*) calloc(sizeof(int), graph.getNbNodes());
     int groupCounter = 0;
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (graph.isPreColored(node)) {

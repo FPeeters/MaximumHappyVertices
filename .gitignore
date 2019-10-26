@@ -34,5 +34,10 @@
 .idea/
 cmake-build-debug/
 
+*.vs/
+out/
+
 *.png
 *.dot
+
+progress.txt
