@@ -32,6 +32,8 @@ unsigned int solveExact(Graph &graph) {
     model.add(IloMinimize(env, objExpr));
 
     IloCplex cplex(model);
+    // cplex.exportModel("model.lp");
+    cplex.setParam(IloCplex::EpRHS, 1e-9);
     cplex.solve();
 
     std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl;
@@ -40,9 +42,6 @@ unsigned int solveExact(Graph &graph) {
         if (!graph.isPreColored(node))
             graph.color(node, cplex.getValue(xArr[node]));
 
-	double nbUnhappy = cplex.getObjValue();
-
     env.end();
-
-    return graph.getNbNodes() - nbUnhappy;
+    return graph.getHappyVertices();
 }

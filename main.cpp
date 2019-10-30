@@ -9,7 +9,7 @@ int main() {
 
     unsigned int happy = solveExact(graph);
 
-    std::cout << happy << " " << graph.getHappyVertices() << std::endl;
+    std::cout << happy << std::endl;
 
     graph.writeToDot("graph");
     return EXIT_SUCCESS;

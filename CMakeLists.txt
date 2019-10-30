@@ -7,7 +7,7 @@ include(FindPackageHandleStandardArgs)
 
 # Find the path to CPLEX Studio.
 
-set(CPLEX_ILOG_DIRS "D:/Programs/IBM/ILOG")
+set(CPLEX_ILOG_DIRS "D:/Programs/IBM/ILOG" "C:/Program Files/IBM/ILOG")
 set(CPLEX_ARCH x64)
 
 if (NOT CPLEX_STUDIO_DIR)
