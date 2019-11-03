@@ -7,7 +7,7 @@
 int main() {
     Graph graph("../../../graph.txt");
 
-    unsigned int happy = solveExact(graph);
+    unsigned int happy = simulatedAnnealing(graph, 123);
 
     std::cout << happy << std::endl;
 
