@@ -5,12 +5,12 @@
 #include "ExactSolver.h"
 
 int main() {
-    Graph graph("../../../graph.txt");
+    Graph graph("../../../graph2.txt");
 
-    unsigned int happy = simulatedAnnealing(graph, 123);
+    unsigned int happy = solveExact(graph);
 
     std::cout << happy << std::endl;
 
-    graph.writeToDot("../../../graph");
+    graph.writeToDot("../../../graph2");
     return EXIT_SUCCESS;
 }

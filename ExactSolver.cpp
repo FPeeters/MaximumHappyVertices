@@ -3,23 +3,45 @@
 #include <ilcplex/ilocplexi.h>
 #include "ExactSolver.h"
 
+void
+checkConstraints(const Graph &graph, const IloIntVarArray &xArr, const IloBoolVarArray &yArr, const IloCplex &cplex) {
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        IloNum nodeColor = cplex.getValue(xArr[node]);
+        auto col = (unsigned int) round(cplex.getValue(xArr[node]));
+        auto realCol = (unsigned int) cplex.getValue(xArr[node]);
+        if (col != realCol)
+            std::cout << "Conversion error for node " << node << std::endl;
+
+        for (auto adj: graph.getEdges(node)) {
+            IloNum adjColor = cplex.getValue(xArr[adj]);
+            if (abs(nodeColor - adjColor) > 1e-9 && abs(cplex.getValue(yArr[node]) - 1) > 1e-9) {
+
+                std::cout << "Violated edge contraint " << node << " -> " << adj;
+                std::cout << " | " << nodeColor << " " << adjColor << " " << cplex.getValue(yArr[node]) << std::endl;
+            }
+        }
+    }
+
+    std::cout << "Objective value: " << graph.getNbNodes() - cplex.getObjValue() << std::endl;
+}
+
 unsigned int solveExact(Graph &graph) {
     IloEnv env;
     IloModel model(env);
 
-    IloNumVarArray xArr(env);
+    IloIntVarArray xArr(env);
     IloBoolVarArray yArr(env);
 
     IloExpr objExpr(env);
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
-        const IloNumVar x(env, 1, graph.getNbColors(), ILOINT);
+        const IloIntVar x(env, 1, graph.getNbColors(), ("Color" + std::to_string(node)).c_str());
         xArr.add(x);
 
         if (graph.isPreColored(node))
             model.add(x == graph.getColor(node));
 
-        const IloBoolVar y(env);
+        const IloBoolVar y(env, ("Unhappy" + std::to_string(node)).c_str());
         yArr.add(y);
         objExpr += y;
     }
@@ -28,20 +50,27 @@ unsigned int solveExact(Graph &graph) {
         for (auto adj: graph.getEdges(node))
             model.add(yArr[node] >= IloAbs(xArr[node] - xArr[adj]) / graph.getNbColors());
 
-
     model.add(IloMinimize(env, objExpr));
 
     IloCplex cplex(model);
-    // cplex.exportModel("model.lp");
     cplex.setParam(IloCplex::EpRHS, 1e-9);
     cplex.solve();
 
-    std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl;
+    std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node)
         if (!graph.isPreColored(node))
-            graph.color(node, cplex.getValue(xArr[node]));
+            graph.color(node, (unsigned int) round(cplex.getValue(xArr[node])));
 
+    checkConstraints(graph, xArr, yArr, cplex);
+
+    unsigned int happy = graph.getNbNodes() - (unsigned int) round(cplex.getObjValue());
     env.end();
+    return happy;
+}
+
+
+unsigned int solveExactAlt(Graph &graph) {
+
     return graph.getHappyVertices();
 }

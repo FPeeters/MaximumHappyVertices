@@ -5,6 +5,6 @@
 
 unsigned int solveExact(Graph &graph);
 
-unsigned int solveExactIntervals(Graph &graph);
+unsigned int solveExactAlt(Graph &graph);
 
 #endif //MAXHAPPYVERTS_EXACTSOLVER_H
