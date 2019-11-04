@@ -11,6 +11,6 @@ int main() {
 
     std::cout << happy << std::endl;
 
-    graph.writeToDot("graph");
+    graph.writeToDot("../../../graph");
     return EXIT_SUCCESS;
 }

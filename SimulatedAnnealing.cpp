@@ -164,22 +164,75 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
         --nbNodes;
     }
 
-    std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
-    unsigned int nbColor = colorDistr(rng);
-    auto it = group.adjColors.begin();
-    for (; nbColor != 0; --nbColor) it++;
-    unsigned int color = *it;
+    if (group.adjColors.size() == 1) {
+        std::uniform_real_distribution<double> pickDistr(0, 1);
+        if (pickDistr(rng) < 0.5)
+            for (unsigned int leftNode: leftGroup)
+                graph.color(leftNode, *group.adjColors.begin());
 
-    for (unsigned int leftNode: leftGroup)
-        graph.color(leftNode, color);
+        else
+            for (unsigned int rightNode: rightGroup)
+                graph.color(rightNode, *group.adjColors.begin());
 
-    nbColor = colorDistr(rng);
-    it = group.adjColors.begin();
-    for (; nbColor != 0; --nbColor) it++;
-    color = *it;
+    } else {
+        std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
+        unsigned int nbColor = colorDistr(rng);
+        auto it = group.adjColors.begin();
+        for (; nbColor != 0; --nbColor) it++;
+        unsigned int color = *it;
 
-    for (unsigned int rightNode: rightGroup)
-        graph.color(rightNode, color);
+        for (unsigned int leftNode: leftGroup)
+            graph.color(leftNode, color);
+
+        nbColor = colorDistr(rng);
+        it = group.adjColors.begin();
+        for (; nbColor != 0; --nbColor) it++;
+        color = *it;
+
+        for (unsigned int rightNode: rightGroup)
+            graph.color(rightNode, color);
+    }
+}
+
+void swapDegreeBased(Graph &graph, Rng &rng) {
+    unsigned int nbEdges = 0;
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        if (!graph.isPreColored(node))
+            nbEdges += graph.getEdges(node).size();
+    }
+
+    std::uniform_int_distribution<unsigned int> degreeDistr(0, nbEdges - 1);
+    unsigned int pickedDegree = degreeDistr(rng);
+
+    unsigned int pickedNode = -1;
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        if (!graph.isPreColored(node)) {
+            const unsigned int degree = graph.getEdges(node).size();
+            if (pickedDegree >= degree)
+                pickedDegree -= degree;
+            else {
+                pickedNode = node;
+                break;
+            }
+        }
+    }
+
+    std::set<unsigned int> adjColors;
+    for (unsigned int adj: graph.getEdges(pickedNode)) {
+        if (graph.getColor(adj) != graph.getColor(pickedNode))
+            adjColors.insert(graph.getColor(adj));
+    }
+
+    if (adjColors.empty()) {
+        std::uniform_int_distribution<unsigned int> colorDistr(1, graph.getNbColors());
+        graph.color(pickedNode, colorDistr(rng));
+    } else {
+        std::uniform_int_distribution<unsigned int> colorDistr(0, adjColors.size() - 1);
+        unsigned int nbColor = colorDistr(rng);
+        auto it = adjColors.begin();
+        for (; nbColor != 0; --nbColor) it++;
+        graph.color(pickedNode, *it);
+    }
 }
 
 Graph generateNeighbour(const Graph &graph, Rng &rng) {
@@ -192,7 +245,8 @@ Graph generateNeighbour(const Graph &graph, Rng &rng) {
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
     if (group.nodes.size() > 1 && splitDistr(rng) < 0.5)
-        splitGroup(newGraph, group, rng);
+        //splitGroup(newGraph, group, rng);
+        swapDegreeBased(newGraph, rng);
     else {
         std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
         unsigned int nbColor = colorDistr(rng);
@@ -225,11 +279,14 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
     std::ofstream f;
     f.open("../../../progress.txt");
 
-    int maxIter = 5000;
+    int maxIter = 10000;
     double temperature = 500;
 
     const unsigned int nodes = graph.getNbNodes();
     unsigned int energy = nodes - graph.getHappyVertices();
+
+    unsigned int currBestEnergy = energy;
+    Graph currBestGraph = graph;
 
     for (int i = 0; i < maxIter; ++i) {
         Graph neighbour = generateNeighbour(graph, rng);
@@ -238,10 +295,17 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
             printf("Swapped from %u to %u\n", energy, newEnergy);
             graph = neighbour;
             energy = newEnergy;
+
+            if (energy < currBestEnergy) {
+                currBestEnergy = energy;
+                currBestGraph = graph;
+            }
         }
         temperature = coolTemperature(temperature);
 
         f << energy << std::endl;
     }
-    return nodes - energy;
+
+    graph = currBestGraph;
+    return nodes - currBestEnergy;
 }
