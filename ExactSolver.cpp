@@ -53,7 +53,6 @@ unsigned int solveExact(Graph &graph) {
     model.add(IloMinimize(env, objExpr));
 
     IloCplex cplex(model);
-    cplex.setParam(IloCplex::EpRHS, 1e-9);
     cplex.solve();
 
     std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;
@@ -61,8 +60,6 @@ unsigned int solveExact(Graph &graph) {
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node)
         if (!graph.isPreColored(node))
             graph.color(node, (unsigned int) round(cplex.getValue(xArr[node])));
-
-    checkConstraints(graph, xArr, yArr, cplex);
 
     unsigned int happy = graph.getNbNodes() - (unsigned int) round(cplex.getObjValue());
     env.end();

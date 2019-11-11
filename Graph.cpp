@@ -1,7 +1,5 @@
 #include <fstream>
-#include <iostream>
 #include <cstring>
-#include <sstream>
 #include "Graph.h"
 
 using namespace std;
@@ -129,7 +127,6 @@ void Graph::writeToDot(const std::string &filename) const {
     out << "}" << endl;
     out.close();
 
-    ostringstream cmd;
-    cmd << "sfdp " << filename << ".dot -Tpng -o" << filename << ".png";
-    system(("sfdp " + filename + ".dot -Tpng -o" + filename + ".png").c_str());
+    system(("sfdp " + filename + ".dot -Tpng -o" + filename).c_str());
+    remove((filename + ".dot").c_str());
 }
