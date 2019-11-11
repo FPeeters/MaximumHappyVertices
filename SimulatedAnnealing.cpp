@@ -1,4 +1,5 @@
 #include "SimulatedAnnealing.h"
+#include "config.h"
 #include <random>
 #include <queue>
 #include <fstream>
@@ -271,16 +272,17 @@ double coolTemperature(double temperature) {
     return temperature * 0.995;
 }
 
-unsigned int simulatedAnnealing(Graph &graph, int seed) {
-    Rng rng = Rng(seed);
+unsigned int simulatedAnnealing(Graph &graph, config &config) {
+    Rng rng = Rng(config.seed);
     std::uniform_real_distribution<double> swapDistr(0,1);
     initRandomColoring(graph, rng);
 
     std::ofstream f;
-    f.open("../../../progress.txt");
+    if (config.outputProgress)
+        f.open("progress.txt");
 
-    int maxIter = 10000;
-    double temperature = 500;
+    int maxIter = config.maxIterations;
+    double temperature = config.initTemp;
 
     const unsigned int nodes = graph.getNbNodes();
     unsigned int energy = nodes - graph.getHappyVertices();
@@ -293,6 +295,7 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
         unsigned int newEnergy = nodes - neighbour.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
             printf("Swapped from %u to %u\n", energy, newEnergy);
+
             graph = neighbour;
             energy = newEnergy;
 
@@ -303,8 +306,12 @@ unsigned int simulatedAnnealing(Graph &graph, int seed) {
         }
         temperature = coolTemperature(temperature);
 
-        f << energy << std::endl;
+        if (config.outputProgress)
+            f << energy << std::endl;
     }
+
+    if (config.outputProgress)
+        f.close();
 
     graph = currBestGraph;
     return nodes - currBestEnergy;

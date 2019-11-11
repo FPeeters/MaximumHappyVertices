@@ -3,14 +3,34 @@
 #include "ConstructiveAlgs.h"
 #include "SimulatedAnnealing.h"
 #include "ExactSolver.h"
+#include "config.h"
 
-int main() {
-    Graph graph("../../../graph2.txt");
+int main(int argc, char** argv) {
+    config config(argc, argv);
+    if (!config.loaded)
+        return EXIT_FAILURE;
 
-    unsigned int happy = solveExact(graph);
+    Graph graph(config.inputFilename);
 
-    std::cout << happy << std::endl;
+    unsigned int happy = 0;
+    switch (config.algorithm) {
+        case config::GREEDY:
+            happy = greedyMHV(graph);
+            break;
+        case config::GROWTH:
+            happy = growthMHV(graph);
+            break;
+        case config::SIMULATED_ANNEALING:
+            happy = simulatedAnnealing(graph, config);
+            break;
+        case config::EXACT:
+            happy = solveExact(graph);
+            break;
+    }
 
-    graph.writeToDot("../../../graph2");
+    if (config.outputPngFilename != nullptr)
+        graph.writeToDot(config.outputPngFilename);
+
+    std::cout << happy;
     return EXIT_SUCCESS;
 }

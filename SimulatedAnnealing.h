@@ -3,6 +3,7 @@
 
 #include <set>
 #include "Graph.h"
+#include "config.h"
 
 struct Group {
     unsigned int color;
@@ -14,6 +15,6 @@ struct Group {
     }
 };
 
-unsigned int simulatedAnnealing(Graph &graph, int seed);
+unsigned int simulatedAnnealing(Graph &graph, config &config);
 
 #endif //MAXHAPPYVERTS_SIMULATEDANNEALING_H
