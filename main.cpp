@@ -9,28 +9,35 @@ int main(int argc, char** argv) {
     config config(argc, argv);
     if (!config.loaded)
         return EXIT_FAILURE;
+    
+    try {
+        Graph graph(config.inputFilename);
+        
+        unsigned int happy = 0;
+        
+        switch (config.algorithm) {
+            case config::GREEDY:
+                happy = greedyMHV(graph);
+                break;
+            case config::GROWTH:
+                happy = growthMHV(graph);
+                break;
+            case config::SIMULATED_ANNEALING:
+                happy = simulatedAnnealing(graph, config);
+                break;
+            case config::EXACT:
+                happy = solveExact(graph);
+                break;
+        }
 
-    Graph graph(config.inputFilename);
+        if (config.outputPngFilename != nullptr)
+            graph.writeToDot(config.outputPngFilename);
 
-    unsigned int happy = 0;
-    switch (config.algorithm) {
-        case config::GREEDY:
-            happy = greedyMHV(graph);
-            break;
-        case config::GROWTH:
-            happy = growthMHV(graph);
-            break;
-        case config::SIMULATED_ANNEALING:
-            happy = simulatedAnnealing(graph, config);
-            break;
-        case config::EXACT:
-            happy = solveExact(graph);
-            break;
+        std::cout << happy;
+    } catch (std::runtime_error &e) {
+        std::cout << e.what();
+        return EXIT_FAILURE;
     }
-
-    if (config.outputPngFilename != nullptr)
-        graph.writeToDot(config.outputPngFilename);
-
-    std::cout << happy;
+    
     return EXIT_SUCCESS;
 }

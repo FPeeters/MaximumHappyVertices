@@ -53,6 +53,7 @@ unsigned int solveExact(Graph &graph) {
     model.add(IloMinimize(env, objExpr));
 
     IloCplex cplex(model);
+    cplex.setParam(IloCplex::Param::TimeLimit, 60);
     cplex.solve();
 
     std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;
