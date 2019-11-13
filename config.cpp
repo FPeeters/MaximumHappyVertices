@@ -58,6 +58,11 @@ config::config(int argc, char **argv) {
                 initTemp = strtod(argv[++i], nullptr);
             else if (strcmp("-progress", argv[i]) == 0)
                 outputProgress = true;
+            else {
+                cout << "No such option: " << argv[i] << endl << endl;
+                printUsage();
+                return;
+            }
         }
 
         loaded = true;
