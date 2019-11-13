@@ -2,8 +2,9 @@
 #define MAXHAPPYVERTS_EXACTSOLVER_H
 
 #include "Graph.h"
+#include "config.h"
 
-unsigned int solveExact(Graph &graph);
+unsigned int solveExact(Graph &graph, const config &config);
 
 unsigned int solveExactAlt(Graph &graph);
 

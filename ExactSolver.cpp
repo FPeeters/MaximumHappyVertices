@@ -25,7 +25,7 @@ checkConstraints(const Graph &graph, const IloIntVarArray &xArr, const IloBoolVa
     std::cout << "Objective value: " << graph.getNbNodes() - cplex.getObjValue() << std::endl;
 }
 
-unsigned int solveExact(Graph &graph) {
+unsigned int solveExact(Graph &graph, const config &config) {
     IloEnv env;
     IloModel model(env);
 
@@ -53,7 +53,9 @@ unsigned int solveExact(Graph &graph) {
     model.add(IloMinimize(env, objExpr));
 
     IloCplex cplex(model);
-    cplex.setParam(IloCplex::Param::TimeLimit, 60);
+    if (config.timeLimit != -1)
+        cplex.setParam(IloCplex::Param::TimeLimit, config.timeLimit);
+    cplex.setParam(IloCplex::Param::Threads, config.threads);
     cplex.solve();
 
     std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;

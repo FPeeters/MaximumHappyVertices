@@ -17,16 +17,20 @@ int main(int argc, char** argv) {
         
         switch (config.algorithm) {
             case config::GREEDY:
+                std::cout << "Executing greedy search" << std::endl;
                 happy = greedyMHV(graph);
                 break;
             case config::GROWTH:
+                std::cout << "Executing growth search" << std::endl;
                 happy = growthMHV(graph);
                 break;
             case config::SIMULATED_ANNEALING:
+                std::cout << "Executing simulated annealing" << std::endl;
                 happy = simulatedAnnealing(graph, config);
                 break;
             case config::EXACT:
-                happy = solveExact(graph);
+                std::cout << "Executing exact solver" << std::endl;
+                happy = solveExact(graph, config);
                 break;
         }
 

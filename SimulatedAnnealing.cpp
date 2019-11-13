@@ -272,7 +272,7 @@ double coolTemperature(double temperature) {
     return temperature * 0.995;
 }
 
-unsigned int simulatedAnnealing(Graph &graph, config &config) {
+unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     Rng rng = Rng(config.seed);
     std::uniform_real_distribution<double> swapDistr(0,1);
     initRandomColoring(graph, rng);

@@ -15,6 +15,6 @@ struct Group {
     }
 };
 
-unsigned int simulatedAnnealing(Graph &graph, config &config);
+unsigned int simulatedAnnealing(Graph &graph, const config &config);
 
 #endif //MAXHAPPYVERTS_SIMULATEDANNEALING_H

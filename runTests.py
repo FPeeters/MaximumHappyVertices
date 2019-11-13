@@ -3,10 +3,12 @@ import sys
 import subprocess
 from multiprocessing.pool import ThreadPool
 
-cmdArgs = sys.argv[1:]
+cmdArgs = sys.argv[1:] + ["-threads 1"]
+
 
 def work(filename):
-    result = subprocess.run(["cmake-build-visual-studio\\main.exe"] + [filename] + cmdArgs, stdout=subprocess.PIPE, universal_newlines=True)
+    result = subprocess.run(["cmake-build-visual-studio\\main.exe"] + [filename] + cmdArgs,
+                            stdout=subprocess.PIPE, universal_newlines=True)
 
     print(filename, " done")
     if result.returncode != 0:
@@ -16,7 +18,7 @@ def work(filename):
     return happy
 
 
-tp = ThreadPool(1)
+tp = ThreadPool()
 results = []
 
 for file in glob.glob("testInstances/*.txt"):

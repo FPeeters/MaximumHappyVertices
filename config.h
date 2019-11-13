@@ -15,6 +15,10 @@ public:
     algorithm algorithm = EXACT;
     int seed = 123;
 
+    // Exact solver options
+    int timeLimit = -1;
+    int threads = 0;
+
     // Simulated annealing options
     int maxIterations = 5000;
     double initTemp = 500;
