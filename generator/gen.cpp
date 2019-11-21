@@ -53,12 +53,12 @@ void outputDegreeInfo(vector<vector<bool> > &adjacent, ofstream &outStream) {
 
 //------------------------------------------------------------------------------------------------------------------------------------
 //Procedure for making a random graph
-void makeRandomGraph(vector<vector<bool> > &adjacent, int &numEdges, double p, const Rng &rng) {
+void makeRandomGraph(vector<vector<bool> > &adjacent, int &numEdges, double p, Rng &rng) {
     int i, j, n = adjacent.size();
     uniform_real_distribution<double> chance(0, 1);
     for (i = 0; i < n - 1; i++) {
         for (j = i + 1; j < n; j++) {
-            if (chance(rng) / double(RAND_MAX) < p) {
+            if (chance(rng) < p) {
                 //Add an edge between vertices i and j
                 adjacent[i][j] = true;
                 adjacent[j][i] = true;
@@ -70,9 +70,9 @@ void makeRandomGraph(vector<vector<bool> > &adjacent, int &numEdges, double p, c
 
 //------------------------------------------------------------------------------------------------------------------------------------
 //Procedures for making a scale free graph
-int selectLinkRoulette(vector<int> &tempDeg, int u, int totalTempDeg, const Rng &rng) {
+int selectLinkRoulette(vector<int> &tempDeg, int u, int totalTempDeg, Rng &rng) {
     int i, r, cumulative = 0;
-    uniform_int_distribution<int> rand(0, totalTempDeg);
+    uniform_int_distribution<int> rand(0, totalTempDeg - 1);
     r = rand(rng);
     for (i = 0; i < u; i++) {
         cumulative += tempDeg[i];
@@ -84,7 +84,7 @@ int selectLinkRoulette(vector<int> &tempDeg, int u, int totalTempDeg, const Rng 
     return -1;
 }
 
-bool makeScaleFree(vector<vector<bool> > &adjacent, int &numEdges, int m, const Rng &rng) {
+bool makeScaleFree(vector<vector<bool> > &adjacent, int &numEdges, int m, Rng &rng) {
     //Procedure for making a scale free graph, where m edges are added in each iteration
     int i, j, n = adjacent.size(), v, totalTempDeg, m0 = 0;
     vector<int> deg(n, 0);
@@ -163,7 +163,7 @@ void choosePair(vector<int> &points, int &x, int &y, int n, vector<vector<bool> 
     x = y = -1;
 }
 
-bool getPairs(vector<int> &pointPairs, int n, int d, const Rng &rng) {
+bool getPairs(vector<int> &pointPairs, int n, int d, Rng &rng) {
     int i, j, x, y, group1, group2;
     pointPairs.clear();
     //define array of all points and shuffle randomly
@@ -212,7 +212,7 @@ bool graphIsDRegular(vector<int> &pointPairs, int n) {
     return true;
 }
 
-void makeDRegularGraph(vector<vector<bool> > &adjacent, int &numEdges, int d, const Rng &rng) {
+void makeDRegularGraph(vector<vector<bool> > &adjacent, int &numEdges, int d, Rng &rng) {
     //Make a d-regular graph. I.e. all vertices have a fixed degree of d. We do this using the Steger and Wormald method
     //This means that if d > n / 2, we make the complement and then flip the bits in the adjaency matrix. There is a small
     //chance that this method can fail, so the algorithm iterates until it succeeds.
@@ -270,7 +270,7 @@ bool hasNeighbourWithDiffColourToCol(int v, int col, vector<int> &colour, vector
     return false;
 }
 
-int getSuitableColour(int v, vector<int> &colour, vector<vector<int> > &adjList, int k, const Rng &rng) {
+int getSuitableColour(int v, vector<int> &colour, vector<vector<int> > &adjList, int k, Rng &rng) {
     //A suitable colour exisits for v if and only if it has exactly zero or one different colours adjacent to it
     int i, u, numColsInNhood = 0, c = -1;
     vector<bool> colUsedInNhood(k, false);
@@ -303,7 +303,7 @@ int getSuitableColour(int v, vector<int> &colour, vector<vector<int> > &adjList,
 
 bool
 makePrecolouringsWithRestrictions(vector<int> &perm, vector<vector<int> > &adjList, vector<vector<bool> > &adjacent,
-                                  vector<int> &colour, int k, int m, string &comment, const Rng &rng) {
+                                  vector<int> &colour, int k, int m, string &comment, Rng &rng) {
     //This procedure randomly assigns colours to vertices. As usual, we ensure that each colour is used at least once; however, we also ensure that endpoints of edges
     //do not have different colours assigned to them. This is done randomly, but with extra checks. The procedure makes "maxFails" = 100 attempts at precolouring the
     //vertices and if it fails them all it just gives up.
@@ -491,7 +491,7 @@ int main(int argc, char *argv[]) {
     }
 
     //Define random seed
-    const Rng rng(seed);
+    Rng rng(seed);
 
     //Populate the adjacency matrix by constructing the graph
     vector<vector<bool> > adjacent(n, vector<bool>(n, false));
