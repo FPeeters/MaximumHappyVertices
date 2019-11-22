@@ -1,0 +1,31 @@
+Executing exact solver
+CPXPARAM_Threads                                 6
+CPXPARAM_TimeLimit                               360
+Tried aggregator 2 times.
+MIP Presolve eliminated 19842 rows and 13987 columns.
+MIP Presolve modified 41307 coefficients.
+Aggregator did 86065 substitutions.
+Reduced MIP has 180043 rows, 135874 columns, and 474797 nonzeros.
+Reduced MIP has 45558 binaries, 800 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.92 sec. (7659.00 ticks)
+Found incumbent of value 1000.000000 after 1.25 sec. (7906.73 ticks)
+Probing fixed 800 vars, tightened 0 bounds.
+Probing time = 0.44 sec. (60.36 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 45769 rows and 800 columns.
+Reduced MIP has 134274 rows, 135074 columns, and 345022 nonzeros.
+Reduced MIP has 44758 binaries, 800 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.89 sec. (2350.18 ticks)
+
+Root node processing (before b&c):
+  Real time             =    2.89 sec. (10385.93 ticks)
+Parallel b&c, 6 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    2.89 sec. (10385.93 ticks)
+
+Status of the found solution: Optimal
+
+0
