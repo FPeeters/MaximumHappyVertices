@@ -290,7 +290,7 @@ int getSuitableColour(int v, vector<int> &colour, vector<vector<int> > &adjList,
     }
     if (numColsInNhood == 0) {
         //v is adjacent to no colours, so assign it to any colour
-        uniform_int_distribution<int> rand(0, k);
+        uniform_int_distribution<int> rand(0, k - 1);
         return rand(rng);
     } else if (numColsInNhood == 1) {
         //v is only adjacent to one colour, colour c. So also assign it to c
@@ -541,7 +541,7 @@ int main(int argc, char *argv[]) {
         }
         //and now colour colour the remaining (m - k) vertices randomly.
         for (i = k; i < numPrecol; i++) {
-            uniform_int_distribution<int> rand(0, k);
+            uniform_int_distribution<int> rand(0, k - 1);
             colour[perm[i]] = rand(rng);
         }
         comment = "Creation-Successful";
