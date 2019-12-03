@@ -62,7 +62,11 @@ unsigned int solveExact(Graph &graph, const config &config) {
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node)
         if (!graph.isPreColored(node))
-            graph.color(node, (unsigned int) round(cplex.getValue(xArr[node])));
+            try {
+                graph.color(node, (unsigned int) round(cplex.getValue(xArr[node])));
+            } catch (IloCplex::NotExtractedException &e) {
+                graph.color(node, 1);
+            }
 
     unsigned int happy = graph.getNbNodes() - (unsigned int) round(cplex.getObjValue());
     env.end();

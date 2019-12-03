@@ -26,7 +26,7 @@ def work(filename):
     return happy, t
 
 
-tp = ThreadPool(6)
+# tp = ThreadPool(6)
 results = []
 
 for file in glob.glob("todo/*.txt"):
