@@ -4,7 +4,7 @@ import subprocess
 import time
 from multiprocessing.pool import ThreadPool
 
-cmdArgs = sys.argv[1:] + ["-threads", "6", "-time", "360"]
+cmdArgs = sys.argv[1:] + ["-a", "simAnn"]
 
 
 def work(filename):
@@ -29,7 +29,7 @@ def work(filename):
 # tp = ThreadPool(6)
 results = []
 
-for file in glob.glob("todo/*.txt"):
+for file in glob.glob("testInstances/*.txt"):
     results.append((file, work(file)))
 
 #     results.append((file, tp.apply_async(work, [file])))
@@ -39,4 +39,5 @@ for file in glob.glob("todo/*.txt"):
 #
 # results = [(f.split('\\')[-1], r.get()) for (f, r) in results]
 
-print(results)
+for res in results:
+    print(res)

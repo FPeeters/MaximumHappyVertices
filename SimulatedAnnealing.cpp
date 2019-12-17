@@ -263,13 +263,17 @@ Graph generateNeighbour(const Graph &graph, Rng &rng) {
 }
 
 double swapProbability(unsigned int oldEnergy, unsigned int newEnergy, double temperature) {
-    if (newEnergy > oldEnergy)
+    if (newEnergy < oldEnergy)
         return 1;
+    if (temperature < 0.1)
+        return 0;
     return exp(-(newEnergy - oldEnergy) / temperature);
 }
 
-double coolTemperature(double temperature) {
-    return temperature * 0.995;
+double coolTemperature(double temperature, const config &config) {
+    if (temperature < 0.1)
+        return 0;
+    return temperature - (config.initTemp / (config.maxIterations * 0.95));
 }
 
 unsigned int simulatedAnnealing(Graph &graph, const config &config) {
@@ -304,7 +308,7 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
                 currBestGraph = graph;
             }
         }
-        temperature = coolTemperature(temperature);
+        temperature = coolTemperature(temperature, config);
 
         if (config.outputProgress)
             f << energy << std::endl;

@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
     config config(argc, argv);
     if (!config.loaded)
         return EXIT_FAILURE;
-    
+
     try {
         Graph graph(config.inputFilename);
         
