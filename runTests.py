@@ -30,7 +30,7 @@ def work(filename):
 results = []
 
 for file in glob.glob("testInstances/*.txt"):
-    results.append((file, work(file)))
+    results.append((file.split("\\")[-1], work(file)))
 
 #     results.append((file, tp.apply_async(work, [file])))
 #

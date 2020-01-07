@@ -25,6 +25,7 @@ public:
     bool outputProgress = false;
 
     char* outputPngFilename = nullptr;
+    char* outputFilename = nullptr;
 
 
     explicit config(int argc, char** argv);

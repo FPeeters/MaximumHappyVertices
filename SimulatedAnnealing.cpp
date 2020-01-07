@@ -246,8 +246,8 @@ Graph generateNeighbour(const Graph &graph, Rng &rng) {
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
     if (group.nodes.size() > 1 && splitDistr(rng) < 0.5)
-        //splitGroup(newGraph, group, rng);
-        swapDegreeBased(newGraph, rng);
+        splitGroup(newGraph, group, rng);
+        //swapDegreeBased(newGraph, rng);
     else {
         std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
         unsigned int nbColor = colorDistr(rng);

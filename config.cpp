@@ -12,6 +12,8 @@ static void printUsage() {
         << "-r INT          Seed for the random generator. Default: 123" << endl
         << "-opng FILENAME  Name for the output image of the graph." << endl
         << "                If not present, no image will be generated" << endl
+        << "-out FILENAME   Name for the file used to print the solution to." << endl
+        << "                If not present, the solution will not be outputted" << endl
         << endl
         << "Options for the exact solver"
         << "-time INT       Time limit in seconds for one execution of the exact solver" << endl
@@ -48,6 +50,8 @@ config::config(int argc, char **argv) {
                 seed = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-opng", argv[i]) == 0)
                 outputPngFilename = argv[++i];
+            else if (strcmp("-out", argv[i]) == 0)
+                outputFilename = argv[++i];
             else if (strcmp("-time", argv[i]) == 0)
                 timeLimit = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-threads", argv[i]) == 0)

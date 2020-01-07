@@ -77,18 +77,21 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
     }
 }
 
+bool Graph::isHappy(const unsigned int node) const {
+    bool happy = true;
+    for (unsigned int adj: getEdges(node)) {
+        if (getColor(node) != getColor(adj)) {
+            happy = false;
+            break;
+        }
+    }
+    return happy;
+}
+
 unsigned int Graph::getHappyVertices() const {
     unsigned int count = 0;
-    bool happy;
-    for (const Node &node: nodes) {
-        happy = true;
-        for (unsigned int adj: node.edges) {
-            if (node.color != getColor(adj)) {
-                happy = false;
-                break;
-            }
-        }
-        if (happy)
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        if (isHappy(node))
             ++count;
     }
     return count;
@@ -129,4 +132,31 @@ void Graph::writeToDot(const std::string &filename) const {
 
     system(("sfdp " + filename + ".dot -Tpng -o" + filename).c_str());
     remove((filename + ".dot").c_str());
+}
+
+void Graph::writeToFile(const std::string &filename) const {
+    ofstream out;
+    out.open(filename);
+    if (out.fail()) throw runtime_error("Failed to open file");
+
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        out << node << "\t|\t";
+
+        if (isHappy(node))
+            out << "H" << "\t|\t";
+        else
+            out << "U" << "\t|\t";
+
+        if (isPreColored(node))
+            out << "*";
+        else
+            out << " ";
+
+        out << getColor(node) << "\t|\t";
+        for (auto adj: getEdges(node))
+            out << adj << ", ";
+        out << endl;
+    }
+
+    out.close();
 }

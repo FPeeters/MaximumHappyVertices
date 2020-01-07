@@ -86,9 +86,13 @@ public:
         nodes[to].edges.push_back(from);
     }
 
+    bool isHappy(unsigned int node) const;
+
     unsigned int getHappyVertices() const;
 
     void writeToDot(const std::string &filename) const;
+
+    void writeToFile(const std::string &filename) const;
 };
 
 #endif //MAXHAPPYVERTS_GRAPH_H
