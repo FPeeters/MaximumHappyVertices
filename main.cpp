@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
                 break;
             case config::GROWTH:
                 std::cout << "Executing growth search" << std::endl;
-                happy = growthMHV(graph);
+                happy = growthMHV(graph, config);
                 break;
             case config::SIMULATED_ANNEALING:
                 std::cout << "Executing simulated annealing" << std::endl;

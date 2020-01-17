@@ -60,15 +60,17 @@ unsigned int solveExact(Graph &graph, const config &config) {
 
     std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;
 
-    for (unsigned int node = 0; node < graph.getNbNodes(); ++node)
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (!graph.isPreColored(node))
             try {
                 graph.color(node, (unsigned int) round(cplex.getValue(xArr[node])));
             } catch (IloCplex::NotExtractedException &e) {
                 graph.color(node, 1);
             }
+    }
 
     unsigned int happy = graph.getNbNodes() - (unsigned int) round(cplex.getObjValue());
+    std::cout << cplex.getMIPRelativeGap() << std::endl;
     env.end();
     return happy;
 }

@@ -2,9 +2,9 @@ import glob
 import sys
 import subprocess
 import time
-from multiprocessing.pool import ThreadPool
+import csv
 
-cmdArgs = sys.argv[1:] + ["-a", "simAnn"]
+cmdArgs = sys.argv[1:] + ["-a", "exact", "-time", "900", "-threads", "6"]
 
 
 def work(filename):
@@ -14,30 +14,25 @@ def work(filename):
                             stdout=subprocess.PIPE, universal_newlines=True)
     t = time.time() - t
 
-    f = open(filename + ".log", "w")
-    f.write(result.stdout)
-    f.close()
-
     print(filename, " done")
     if result.returncode != 0:
         return -1, t
 
-    happy = result.stdout.split("\n")[-1]
-    return happy, t
+    lines = result.stdout.split("\n")
+    gap = lines[-2]
+    happy = lines[-1]
+    return happy, t, gap
 
 
-# tp = ThreadPool(6)
 results = []
 
-for file in glob.glob("testInstances/*.txt"):
+for file in glob.glob("todo/*.txt"):
     results.append((file.split("\\")[-1], work(file)))
 
-#     results.append((file, tp.apply_async(work, [file])))
-#
-# tp.close()
-# tp.join()
-#
-# results = [(f.split('\\')[-1], r.get()) for (f, r) in results]
+file = open("results.txt", "w")
+writer = csv.writer(file)
 
 for res in results:
-    print(res)
+    writer.writerow([res[0]] + list(res[1]))
+
+file.close()
