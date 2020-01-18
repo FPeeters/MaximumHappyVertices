@@ -5,25 +5,29 @@ using namespace std;
 
 static void printUsage() {
     cout << "Solver for the Maximum Happy Vertices Problem" << endl
-        << "USAGE:" << endl << endl
-        << "INPUTFILE       Required, name if the input graph, in DIMACS format." << endl
-        << "-a alg          Alogorithm choice, possible options:" << endl
-        << "                greedy, growth, simAnn, exact. Default: exact" << endl
-        << "-r INT          Seed for the random generator. Default: 123" << endl
-        << "-opng FILENAME  Name for the output image of the graph." << endl
-        << "                If not present, no image will be generated" << endl
-        << "-out FILENAME   Name for the file used to print the solution to." << endl
-        << "                If not present, the solution will not be outputted" << endl
-        << endl
-        << "Options for the exact solver"
-        << "-time INT       Time limit in seconds for one execution of the exact solver" << endl
-        << "-threads INT    The amount of threads used by the exact solver." << endl
-        << "                Default: The maximum amount of threads available." << endl
-        << endl
-        << "Options for simulated annealing" << endl
-        << "-i INT          Maximum amount of iterations. Default: 5000" << endl
-        << "-temp DOUBLE    Initial temperature. Default: 500" << endl
-        << "-progress       Flag, if present, a file progress.txt will be generated." << endl;
+         << "USAGE:" << endl << endl
+         << "INPUTFILE       Required, name if the input graph, in DIMACS format." << endl
+         << "-a ALG          Alogorithm choice, possible options:" << endl
+         << "                greedy, growth, simAnn, exact. Default: exact" << endl
+         << "-r INT          Seed for the random generator. Default: 123" << endl
+         << "-opng FILENAME  Name for the output image of the graph." << endl
+         << "                If not present, no image will be generated" << endl
+         << "-out FILENAME   Name for the file used to print the solution to." << endl
+         << "                If not present, the solution will not be outputted" << endl
+         << endl
+         << "Options for the exact solver"
+         << "-time INT       Time limit in seconds for one execution of the exact solver" << endl
+         << "-threads INT    The amount of threads used by the exact solver." << endl
+         << "                Default: The maximum amount of threads available." << endl
+         << endl
+         << "Options for simulated annealing" << endl
+         << "-init ALG       Initial solution algotihm: possible options:" << endl
+         << "                random, greedy, growth. Default: random" << endl
+         << "-i INT          Maximum amount of iterations. Default: 5000" << endl
+         << "-temp DOUBLE    Initial temperature. Default: 500" << endl
+         << "-progress       Flag, if present, a file progress.txt will be generated." << endl
+         << "-swap DOUBLE    Chance to use the swap operator in neighbour generation. Default: 0.33" << endl
+         << "-split DOUBLE   Chance to use the split operator in neighbour generation. Default: 0.33" << endl;
 }
 
 config::config(int argc, char **argv) {
@@ -56,17 +60,34 @@ config::config(int argc, char **argv) {
                 timeLimit = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-threads", argv[i]) == 0)
                 threads = (int) strtol(argv[++i], nullptr, 10);
-            else if (strcmp("-i", argv[i]) == 0)
+            else if (strcmp("-init", argv[i]) == 0) {
+                ++i;
+                if (strcmp("random", argv[i]) == 0)
+                    initAlgorithm = random;
+                else if (strcmp("greedy", argv[i]) == 0)
+                    initAlgorithm = greedy;
+                else if (strcmp("growth", argv[i]) == 0)
+                    initAlgorithm = growth;
+            } else if (strcmp("-i", argv[i]) == 0)
                 maxIterations = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-temp", argv[i]) == 0)
                 initTemp = strtod(argv[++i], nullptr);
             else if (strcmp("-progress", argv[i]) == 0)
                 outputProgress = true;
+            else if (strcmp("-swap", argv[i]) == 0)
+                swapDegreePerc = strtod(argv[++i], nullptr);
+            else if (strcmp("-split", argv[i]) == 0)
+                splitGroupPerc = strtod(argv[++i], nullptr);
             else {
                 cout << "No such option: " << argv[i] << endl << endl;
                 printUsage();
                 return;
             }
+        }
+
+        if (swapDegreePerc + splitGroupPerc > 1) {
+            cout << "The sum of both percentages must be < 1." << endl;
+            return;
         }
 
         loaded = true;

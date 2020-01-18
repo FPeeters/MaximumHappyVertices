@@ -1,5 +1,6 @@
 #include "SimulatedAnnealing.h"
 #include "config.h"
+#include "ConstructiveAlgs.h"
 #include <random>
 #include <queue>
 #include <fstream>
@@ -16,7 +17,7 @@ void initRandomColoring(Graph &graph, Rng &rng) {
 
 std::vector<Group> generateGroups(const Graph &graph) {
     std::vector<Group> groups;
-    int* group = (int*) calloc(sizeof(int), graph.getNbNodes());
+    int *group = (int *) calloc(sizeof(int), graph.getNbNodes());
     int groupCounter = 0;
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (graph.isPreColored(node)) {
@@ -56,7 +57,7 @@ std::vector<Group> generateGroups(const Graph &graph) {
     return groups;
 }
 
-void splitGroup(Graph &graph, Group &group,Rng &rng) {
+void splitGroup(Graph &graph, Group &group, Rng &rng) {
     std::vector<unsigned int> candidates;
 
     for (auto node: group.nodes) {
@@ -71,7 +72,7 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
     if (candidates.size() < 2)
         return;
 
-	std::sort(group.nodes.begin(), group.nodes.end());
+    std::sort(group.nodes.begin(), group.nodes.end());
 
     std::uniform_int_distribution<unsigned int> candidateDistr(0, candidates.size() - 1);
     const unsigned int leftSeedIdx = candidateDistr(rng);
@@ -89,18 +90,20 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
 
     const std::vector<unsigned int> &leftInitEdges = graph.getEdges(leftSeed);
     std::vector<unsigned int> diffEdges(leftInitEdges.size());
-    auto iter = std::set_intersection(leftInitEdges.begin(), leftInitEdges.end(), group.nodes.begin(), group.nodes.end(), diffEdges.begin());
+    auto iter = std::set_intersection(leftInitEdges.begin(), leftInitEdges.end(), group.nodes.begin(),
+                                      group.nodes.end(), diffEdges.begin());
     diffEdges.resize(iter - diffEdges.begin());
     std::set<unsigned int> leftEdges(diffEdges.begin(), diffEdges.end());
-	leftEdges.erase(rightSeed);
+    leftEdges.erase(rightSeed);
 
-    const std::vector<unsigned int>& rightInitEdges = graph.getEdges(rightSeed);
+    const std::vector<unsigned int> &rightInitEdges = graph.getEdges(rightSeed);
     diffEdges.clear();
     diffEdges.resize(rightInitEdges.size());
-	iter = std::set_intersection(rightInitEdges.begin(), rightInitEdges.end(), group.nodes.begin(), group.nodes.end(), diffEdges.begin());
+    iter = std::set_intersection(rightInitEdges.begin(), rightInitEdges.end(), group.nodes.begin(), group.nodes.end(),
+                                 diffEdges.begin());
     diffEdges.resize(iter - diffEdges.begin());
-	std::set<unsigned int> rightEdges(diffEdges.begin(), diffEdges.end());
-	rightEdges.erase(leftSeed);
+    std::set<unsigned int> rightEdges(diffEdges.begin(), diffEdges.end());
+    rightEdges.erase(leftSeed);
 
     int nbNodes = group.nodes.size();
 
@@ -112,7 +115,7 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
             leftGroup.insert(leftEdges.begin(), leftEdges.end());
             break;
         }
-        
+
         std::uniform_int_distribution<unsigned int> edgeDistr(0, leftEdges.size() + rightEdges.size() - 2);
         unsigned int edge = edgeDistr(rng);
 
@@ -127,14 +130,17 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
 
             const std::vector<unsigned int> &edges = graph.getEdges(adj);
             std::vector<unsigned int> uni(edges.size());
-            iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(), uni.begin());
+            iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(),
+                                         uni.begin());
             rightEdges.insert(uni.begin(), iter);
 
             std::vector<unsigned int> firstDiff(rightEdges.size());
             std::vector<unsigned int> secondDiff(rightEdges.size());
-            iter = std::set_difference(rightEdges.begin(), rightEdges.end(), rightGroup.begin(), rightGroup.end(), firstDiff.begin());
+            iter = std::set_difference(rightEdges.begin(), rightEdges.end(), rightGroup.begin(), rightGroup.end(),
+                                       firstDiff.begin());
             firstDiff.resize(iter - firstDiff.begin());
-            iter = std::set_difference(firstDiff.begin(), firstDiff.end(), leftGroup.begin(), leftGroup.end(), secondDiff.begin());
+            iter = std::set_difference(firstDiff.begin(), firstDiff.end(), leftGroup.begin(), leftGroup.end(),
+                                       secondDiff.begin());
             rightEdges.clear();
             rightEdges.insert(secondDiff.begin(), iter);
 
@@ -148,14 +154,17 @@ void splitGroup(Graph &graph, Group &group,Rng &rng) {
 
             const std::vector<unsigned int> &edges = graph.getEdges(adj);
             std::vector<unsigned int> intersect(edges.size());
-            iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(), intersect.begin());
+            iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(),
+                                         intersect.begin());
             leftEdges.insert(intersect.begin(), iter);
 
             std::vector<unsigned int> firstDiff(leftEdges.size());
             std::vector<unsigned int> secondDiff(leftEdges.size());
-            iter = std::set_difference(leftEdges.begin(), leftEdges.end(), leftGroup.begin(), leftGroup.end(), firstDiff.begin());
+            iter = std::set_difference(leftEdges.begin(), leftEdges.end(), leftGroup.begin(), leftGroup.end(),
+                                       firstDiff.begin());
             firstDiff.resize(iter - firstDiff.begin());
-            iter = std::set_difference(firstDiff.begin(), firstDiff.end(), rightGroup.begin(), rightGroup.end(), secondDiff.begin());
+            iter = std::set_difference(firstDiff.begin(), firstDiff.end(), rightGroup.begin(), rightGroup.end(),
+                                       secondDiff.begin());
             leftEdges.clear();
             leftEdges.insert(secondDiff.begin(), iter);
 
@@ -236,7 +245,18 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
     }
 }
 
-Graph generateNeighbour(const Graph &graph, Rng &rng) {
+void mergeGroup(Graph &graph, Group &group, Rng &rng) {
+    std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
+    unsigned int nbColor = colorDistr(rng);
+    auto it = group.adjColors.begin();
+    for (; nbColor != 0; --nbColor) it++;
+    unsigned int color = *it;
+
+    for (unsigned int node: group.nodes)
+        graph.color(node, color);
+}
+
+Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config) {
     const std::vector<Group> groups = generateGroups(graph);
 
     Graph newGraph = graph;
@@ -245,18 +265,14 @@ Graph generateNeighbour(const Graph &graph, Rng &rng) {
     Group group = groups[groupDistr(rng)];
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
-    if (group.nodes.size() > 1 && splitDistr(rng) < 0.5)
-        splitGroup(newGraph, group, rng);
-        //swapDegreeBased(newGraph, rng);
-    else {
-        std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
-        unsigned int nbColor = colorDistr(rng);
-        auto it = group.adjColors.begin();
-        for (; nbColor != 0; --nbColor) it++;
-        unsigned int color = *it;
+    const double val = splitDistr(rng);
 
-        for (unsigned int node: group.nodes)
-            newGraph.color(node, color);
+    if (val < config.splitGroupPerc)
+        splitGroup(newGraph, group, rng);
+    else if (val < config.splitGroupPerc + config.swapDegreePerc)
+        swapDegreeBased(newGraph, rng);
+    else {
+        mergeGroup(newGraph, group, rng);
     }
 
     return newGraph;
@@ -278,8 +294,19 @@ double coolTemperature(double temperature, const config &config) {
 
 unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     Rng rng = Rng(config.seed);
-    std::uniform_real_distribution<double> swapDistr(0,1);
-    initRandomColoring(graph, rng);
+    std::uniform_real_distribution<double> swapDistr(0, 1);
+
+    switch (config.initAlgorithm) {
+        case config::random:
+            initRandomColoring(graph, rng);
+            break;
+        case config::greedy:
+            greedyMHV(graph);
+            break;
+        case config::growth:
+            growthMHV(graph, config);
+            break;
+    }
 
     std::ofstream f;
     if (config.outputProgress)
@@ -295,11 +322,9 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     Graph currBestGraph = graph;
 
     for (int i = 0; i < maxIter; ++i) {
-        Graph neighbour = generateNeighbour(graph, rng);
+        Graph neighbour = generateNeighbour(graph, rng, config);
         unsigned int newEnergy = nodes - neighbour.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
-            printf("Swapped from %u to %u\n", energy, newEnergy);
-
             graph = neighbour;
             energy = newEnergy;
 

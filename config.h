@@ -4,7 +4,7 @@
 class config {
 public:
     bool loaded = false;
-    char* inputFilename = nullptr;
+    char *inputFilename = nullptr;
 
     enum algorithm {
         GREEDY,
@@ -20,15 +20,22 @@ public:
     int threads = 0;
 
     // Simulated annealing options
+    enum initAlgorithm {
+        random,
+        greedy,
+        growth
+    };
+    initAlgorithm initAlgorithm = random;
     int maxIterations = 5000;
     double initTemp = 500;
     bool outputProgress = false;
+    double swapDegreePerc = 0.33;
+    double splitGroupPerc = 0.33;
 
-    char* outputPngFilename = nullptr;
-    char* outputFilename = nullptr;
+    char *outputPngFilename = nullptr;
+    char *outputFilename = nullptr;
 
-
-    explicit config(int argc, char** argv);
+    explicit config(int argc, char **argv);
 };
 
 
