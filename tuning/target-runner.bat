@@ -1,9 +1,5 @@
 @echo off
 ::##############################################################################
-:: BAT version of target-runner for Windows.
-:: Contributed by Andre de Souza Andrade <andre.andrade@uniriotec.br>.
-:: Check other examples in examples/
-::
 :: This script is run in the execution directory (execDir, --exec-dir).
 ::
 :: PARAMETERS:
@@ -20,7 +16,7 @@
 
 :: Please change the EXE and FIXED_PARAMS to the correct ones
 SET "exe=cmake-build-visual-studio\main.exe"
-SET "fixed_params=-a simAnn"
+SET "fixed_params=-minimize -a simAnn"
 
 FOR /f "tokens=1-4*" %%a IN ("%*") DO (
 	SET candidate=%%a

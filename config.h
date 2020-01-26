@@ -14,6 +14,7 @@ public:
     };
     algorithm algorithm = EXACT;
     int seed = 123;
+    bool minimize = false;
 
     // Exact solver options
     int timeLimit = -1;

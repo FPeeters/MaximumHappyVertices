@@ -2,8 +2,44 @@
 
 # Each line is an instance relative to trainInstancesDir
 # (see scenario.txt.tmpl) and an optional sequence of instance-specific
-# parameters that will be passed to target-runnerx when invoked on that
+# parameters that will be passed to target-runner when invoked on that
 # instance.
 
 # Empty lines and comments are ignored.
 
+dRegular31.txt
+dRegular32.txt
+dRegular33.txt
+dRegular34.txt
+dRegular35.txt
+dRegular36.txt
+dRegular37.txt
+dRegular38.txt
+
+random31.txt
+random32.txt
+random33.txt
+random34.txt
+random35.txt
+random36.txt
+random37.txt
+random38.txt
+
+random81.txt
+random82.txt
+random85.txt
+random86.txt
+
+scale31.txt
+scale32.txt
+scale33.txt
+scale34.txt
+scale35.txt
+scale36.txt
+scale37.txt
+scale38.txt
+
+scale81.txt
+scale82.txt
+scale85.txt
+scale86.txt

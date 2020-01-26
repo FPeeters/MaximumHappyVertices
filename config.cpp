@@ -13,7 +13,9 @@ static void printUsage() {
          << "-opng FILENAME  Name for the output image of the graph." << endl
          << "                If not present, no image will be generated" << endl
          << "-out FILENAME   Name for the file used to print the solution to." << endl
-         << "                If not present, the solution will not be outputted" << endl
+         << "                If not present, the solution will not be outputted." << endl
+         << "-minimize       The count of unhappy vertices will be printed" << endl
+         << "                Instead of the standard count of happy vertices." << endl
          << endl
          << "Options for the exact solver"
          << "-time INT       Time limit in seconds for one execution of the exact solver" << endl
@@ -26,8 +28,10 @@ static void printUsage() {
          << "-i INT          Maximum amount of iterations. Default: 5000" << endl
          << "-temp DOUBLE    Initial temperature. Default: 500" << endl
          << "-progress       Flag, if present, a file progress.txt will be generated." << endl
-         << "-swap DOUBLE    Chance to use the swap operator in neighbour generation. Default: 0.33" << endl
-         << "-split DOUBLE   Chance to use the split operator in neighbour generation. Default: 0.33" << endl;
+         << "-swap DOUBLE    Chance to use the swap operator in neighbour generation." << endl
+         << "                Default: 0.33" << endl
+         << "-split DOUBLE   Chance to use the split operator in neighbour generation." << endl
+         << "                Default: 0.33" << endl;
 }
 
 config::config(int argc, char **argv) {
@@ -56,6 +60,8 @@ config::config(int argc, char **argv) {
                 outputPngFilename = argv[++i];
             else if (strcmp("-out", argv[i]) == 0)
                 outputFilename = argv[++i];
+            else if (strcmp("-minimize", argv[i]) == 0)
+                minimize = true;
             else if (strcmp("-time", argv[i]) == 0)
                 timeLimit = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-threads", argv[i]) == 0)

@@ -40,7 +40,11 @@ int main(int argc, char** argv) {
         if (config.outputFilename != nullptr)
             graph.writeToFile(config.outputFilename);
 
-        std::cout << happy;
+        if (config.minimize)
+            std::cout << graph.getNbNodes() - happy;
+        else
+            std::cout << happy;
+
     } catch (std::runtime_error &e) {
         std::cout << e.what();
         return EXIT_FAILURE;

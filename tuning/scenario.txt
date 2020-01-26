@@ -1,17 +1,18 @@
 execDir = "../"
 
 trainInstancesDir = "../testInstances"
+# trainInstancesFile = "./instances-list.txt"
 
 targetRunner = "./target-runner.bat"
 
-maxExperiments = 1000
+maxExperiments = 5000
 
 forbiddenFile = "./forbidden.txt"
 parameterFile = "./parameters.txt"
 
 digits = 2
 
-parallel = 2
+parallel = 6
 
 ###################################################### -*- mode: r -*- #####
 ## Scenario setup for Iterated Race (irace).
