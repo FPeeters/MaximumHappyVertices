@@ -1,4 +1,5 @@
 #include <random>
+#include <queue>
 #include "ConstructiveAlgs.h"
 
 typedef std::mt19937_64 Rng;
@@ -223,3 +224,162 @@ unsigned int growthMHV(Graph &graph, const config &config) {
 
     return nbHappy;
 }
+
+struct Group {
+    std::vector<unsigned int> nodes;
+    unsigned int left;
+    unsigned int right;
+
+    Group() : left(-1), right(-1) {};
+};
+
+std::vector<Group> makeGroups(const Graph &graph) {
+    bool *done = (bool *) calloc(graph.getNbNodes(), sizeof(bool));
+
+    std::vector<Group> groups;
+
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        if (done[node])
+            continue;
+        if (graph.isPreColored(node)) {
+            done[node] = true;
+            continue;
+        }
+
+        Group newGroup;
+        std::queue<unsigned int> todo;
+        todo.push(node);
+        bool leftSet = false;
+
+        while (!todo.empty()) {
+            unsigned int check = todo.front();
+            todo.pop();
+
+            if (graph.isPreColored(check)) {
+                if (!leftSet) {
+                    newGroup.left = check;
+                    leftSet = true;
+                } else
+                    newGroup.right = check;
+                continue;
+            }
+
+            if (done[check])
+                continue;
+
+            done[check] = true;
+
+            if (graph.getEdges(check).size() != 2)
+                throw std::runtime_error("Running the 2-regular algorithm for a graph that is not 2-regular");
+
+            newGroup.nodes.push_back(check);
+            todo.push(graph.getEdges(check)[0]);
+            todo.push(graph.getEdges(check)[1]);
+        }
+
+        groups.push_back(newGroup);
+    }
+
+    return groups;
+}
+
+void colorGroup(Graph &graph, const Group &group, const unsigned int color) {
+    for (unsigned int node: group.nodes)
+        graph.color(node, color);
+}
+
+unsigned int twoRegular(Graph &graph) {
+    std::vector<Group> groups = makeGroups(graph);
+
+    std::queue<Group, std::deque<Group>> queue((std::deque<Group>(groups.begin(), groups.end())));
+
+    unsigned int lastChange = -1;
+
+    while (!queue.empty()) {
+        Group group = queue.front();
+        queue.pop();
+
+        if (group.left == -1 && group.right == -1) { // Isolated group with no constraints, any color will do
+            colorGroup(graph, group, 1);
+            lastChange = -1;
+            continue;
+        }
+
+        unsigned int leftCol = graph.getColor(group.left);
+        unsigned int rightCol = graph.getColor(group.right);
+
+        if (group.nodes.front() ==
+            lastChange) { // Nothing has changed since the last time this group was processed, pick a random side.
+            colorGroup(graph, group, leftCol);
+            lastChange = -1;
+            continue;
+        }
+
+        if (leftCol == rightCol) { // Group has the same color on both sides
+            colorGroup(graph, group, leftCol);
+            lastChange = -1;
+            continue;
+        }
+
+        bool leftMatters = false, leftIgnore = false;
+        for (unsigned int adj :graph.getEdges(group.left)) {
+            if (std::find(group.nodes.begin(), group.nodes.end(), adj) == group.nodes.end()) {
+                unsigned int adjCol = graph.getColor(adj);
+                if (adjCol != 0) {
+                    leftMatters = true;
+                    leftIgnore = adjCol != leftCol;
+                }
+            }
+        }
+
+        bool rightMatters = false, rightIgnore = false;
+        for (unsigned int adj :graph.getEdges(group.right)) {
+            if (std::find(group.nodes.begin(), group.nodes.end(), adj) == group.nodes.end()) {
+                unsigned int adjCol = graph.getColor(adj);
+                if (adjCol != 0) {
+                    rightMatters = true;
+                    rightIgnore = adjCol != rightCol;
+                }
+            }
+        }
+
+        // _ - _
+        if (!leftMatters && !rightMatters) {
+            queue.push(group);
+            if (lastChange == -1)
+                lastChange = group.nodes.front();
+            continue;
+        }
+
+        lastChange = -1;
+        // I = ignore, P = prio, _ = doesn't matter
+        if (leftMatters && leftIgnore && rightMatters && rightIgnore) { // I - I
+            colorGroup(graph, group, leftCol);
+            continue;
+        }
+        if (leftMatters && leftIgnore) { // I - P & I - _
+            colorGroup(graph, group, rightCol);
+            continue;
+        }
+        if (rightMatters && rightIgnore) { // P - I & _ - I
+            colorGroup(graph, group, leftCol);
+            continue;
+        }
+        if (leftMatters && !leftIgnore && rightMatters && !rightIgnore) { // P - P
+            colorGroup(graph, group, leftCol);
+            continue;
+        }
+        if (leftMatters && !leftIgnore) { // P - _
+            colorGroup(graph, group, leftCol);
+            continue;
+        }
+        if (rightMatters && !rightIgnore) { // _ - P
+            colorGroup(graph, group, rightCol);
+            continue;
+        }
+    }
+
+    return graph.getHappyVertices();
+}
+
+

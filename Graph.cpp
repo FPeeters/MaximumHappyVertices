@@ -107,9 +107,12 @@ void Graph::writeToDot(const std::string &filename) const {
 
     for (unsigned int node=0; node < nbNodes; ++node) {
         if (isPreColored(node))
-            out << "\tn" << node << " [shape=square,color=" << COLORS[getColor(node)] << "]" << endl;
+            out << "\tn" << node << " [shape=square,color=" << COLORS[getColor(node)];
         else
-            out << "\tn" << node << " [shape=circle,color=" << COLORS[getColor(node)] << "]" << endl;
+            out << "\tn" << node << " [shape=circle,color=" << COLORS[getColor(node)];
+        if (!isHappy(node))
+            out << ",label=U";
+        out << "]" << endl;
     }
 
     for (unsigned int node = 0; node < nbNodes; ++node) {
@@ -130,7 +133,7 @@ void Graph::writeToDot(const std::string &filename) const {
     out << "}" << endl;
     out.close();
 
-    system(("sfdp " + filename + ".dot -Tpng -o" + filename).c_str());
+    system(("sfdp " + filename + ".dot -Tpng -o" + filename + " >nul 2>&1").c_str());
     remove((filename + ".dot").c_str());
 }
 

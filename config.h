@@ -9,6 +9,7 @@ public:
     enum algorithm {
         GREEDY,
         GROWTH,
+        TWO_REGULAR,
         SIMULATED_ANNEALING,
         EXACT
     };

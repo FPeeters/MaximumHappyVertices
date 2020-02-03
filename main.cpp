@@ -24,6 +24,10 @@ int main(int argc, char** argv) {
                 std::cout << "Executing growth search" << std::endl;
                 happy = growthMHV(graph, config);
                 break;
+            case config::TWO_REGULAR:
+                std::cout << "Executing 2-regular exact algorithm" << std::endl;
+                happy = twoRegular(graph);
+                break;
             case config::SIMULATED_ANNEALING:
                 std::cout << "Executing simulated annealing" << std::endl;
                 happy = simulatedAnnealing(graph, config);
@@ -46,7 +50,7 @@ int main(int argc, char** argv) {
             std::cout << happy;
 
     } catch (std::runtime_error &e) {
-        std::cout << e.what();
+        std::cout << std::endl << "The following error occured:" << std::endl << e.what();
         return EXIT_FAILURE;
     }
     

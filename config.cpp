@@ -8,7 +8,7 @@ static void printUsage() {
          << "USAGE:" << endl << endl
          << "INPUTFILE       Required, name if the input graph, in DIMACS format." << endl
          << "-a ALG          Alogorithm choice, possible options:" << endl
-         << "                greedy, growth, simAnn, exact. Default: exact" << endl
+         << "                greedy, growth, 2reg, simAnn, exact. Default: exact" << endl
          << "-r INT          Seed for the random generator. Default: 123" << endl
          << "-opng FILENAME  Name for the output image of the graph." << endl
          << "                If not present, no image will be generated" << endl
@@ -50,6 +50,8 @@ config::config(int argc, char **argv) {
                     algorithm = GREEDY;
                 else if (strcmp("growth", argv[i]) == 0)
                     algorithm = GROWTH;
+                else if (strcmp("2reg", argv[i]) == 0)
+                    algorithm = TWO_REGULAR;
                 else if (strcmp("simAnn", argv[i]) == 0)
                     algorithm = SIMULATED_ANNEALING;
                 else if (strcmp("exact", argv[i]) == 0)

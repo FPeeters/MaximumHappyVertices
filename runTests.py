@@ -4,7 +4,7 @@ import subprocess
 import time
 import csv
 
-cmdArgs = sys.argv[1:] + ["-a", "exact", "-init", "random", "-temp", "292", "-swap", "0.27", "-split", "0.15",
+cmdArgs = sys.argv[1:] + ["-a", "simAnn", "-init", "random", "-temp", "351", "-swap", "0.21", "-split", "0.14",
                           "-threads", "6", "-time", "900"]
 
 
@@ -29,7 +29,7 @@ def work(filename):
 
 results = []
 
-for file in glob.glob("todo/random*.txt"):
+for file in glob.glob("todo/*.txt"):
     results.append((file.split("\\")[-1], work(file)))
 
 file = open("results.txt", "w")
