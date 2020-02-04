@@ -6,7 +6,8 @@
 #include <string>
 #include <stdexcept>
 
-static const std::string COLORS[11] {"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia", "cornflowerblue", "aqua", "peachpuff"};
+static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia",
+                                    "cornflowerblue", "aqua", "peachpuff"};
 
 class Graph {
 
@@ -74,8 +75,7 @@ public:
     inline void addNode(unsigned int color = 0) {
         if (color > nbColors)
             throw std::runtime_error("Color out of bounds");
-        Node node(color);
-        nodes.push_back(node);
+        nodes.emplace_back(color);
         nbNodes++;
     }
 

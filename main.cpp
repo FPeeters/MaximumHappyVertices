@@ -5,16 +5,16 @@
 #include "ExactSolver.h"
 #include "config.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     config config(argc, argv);
     if (!config.loaded)
         return EXIT_FAILURE;
 
     try {
         Graph graph(config.inputFilename);
-        
+
         unsigned int happy = 0;
-        
+
         switch (config.algorithm) {
             case config::GREEDY:
                 std::cout << "Executing greedy search" << std::endl;
@@ -53,6 +53,6 @@ int main(int argc, char** argv) {
         std::cout << std::endl << "The following error occured:" << std::endl << e.what();
         return EXIT_FAILURE;
     }
-    
+
     return EXIT_SUCCESS;
 }

@@ -225,18 +225,18 @@ unsigned int growthMHV(Graph &graph, const config &config) {
     return nbHappy;
 }
 
-struct Group {
+struct LeftRightGroup {
     std::vector<unsigned int> nodes;
     unsigned int left;
     unsigned int right;
 
-    Group() : left(-1), right(-1) {};
+    LeftRightGroup() : left(-1), right(-1) {};
 };
 
-std::vector<Group> makeGroups(const Graph &graph) {
+std::vector<LeftRightGroup> makeGroups(const Graph &graph) {
     bool *done = (bool *) calloc(graph.getNbNodes(), sizeof(bool));
 
-    std::vector<Group> groups;
+    std::vector<LeftRightGroup> groups;
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (done[node])
@@ -246,7 +246,7 @@ std::vector<Group> makeGroups(const Graph &graph) {
             continue;
         }
 
-        Group newGroup;
+        LeftRightGroup newGroup;
         std::queue<unsigned int> todo;
         todo.push(node);
         bool leftSet = false;
@@ -283,20 +283,21 @@ std::vector<Group> makeGroups(const Graph &graph) {
     return groups;
 }
 
-void colorGroup(Graph &graph, const Group &group, const unsigned int color) {
+void colorGroup(Graph &graph, const LeftRightGroup &group, const unsigned int color) {
     for (unsigned int node: group.nodes)
         graph.color(node, color);
 }
 
 unsigned int twoRegular(Graph &graph) {
-    std::vector<Group> groups = makeGroups(graph);
+    std::vector<LeftRightGroup> groups = makeGroups(graph);
 
-    std::queue<Group, std::deque<Group>> queue((std::deque<Group>(groups.begin(), groups.end())));
+    std::queue<LeftRightGroup, std::deque<LeftRightGroup>> queue(
+            (std::deque<LeftRightGroup>(groups.begin(), groups.end())));
 
     unsigned int lastChange = -1;
 
     while (!queue.empty()) {
-        Group group = queue.front();
+        LeftRightGroup group = queue.front();
         queue.pop();
 
         if (group.left == -1 && group.right == -1) { // Isolated group with no constraints, any color will do

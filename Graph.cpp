@@ -56,8 +56,8 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
             if (preColor.first == i) {
                 addNode(preColor.second);
                 ++preColorCounter;
-				if (preColorCounter < preColoring.size())
-					preColor = preColoring[preColorCounter];
+                if (preColorCounter < preColoring.size())
+                    preColor = preColoring[preColorCounter];
                 continue;
             } else if (preColor.first < i)
                 throw runtime_error("A node was colored multiple times");
@@ -105,7 +105,7 @@ void Graph::writeToDot(const std::string &filename) const {
     out << "graph [overlap=false]" << endl;
     out << "node [style=filled,width=0.05,label=\"\",colorscheme=svg,fixedsize=true]" << endl;
 
-    for (unsigned int node=0; node < nbNodes; ++node) {
+    for (unsigned int node = 0; node < nbNodes; ++node) {
         if (isPreColored(node))
             out << "\tn" << node << " [shape=square,color=" << COLORS[getColor(node)];
         else

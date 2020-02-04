@@ -72,16 +72,14 @@ void splitGroup(Graph &graph, Group &group, Rng &rng) {
     if (candidates.size() < 2)
         return;
 
-    std::sort(group.nodes.begin(), group.nodes.end());
-
     std::uniform_int_distribution<unsigned int> candidateDistr(0, candidates.size() - 1);
     const unsigned int leftSeedIdx = candidateDistr(rng);
     unsigned int rightSeedIdx;
     do rightSeedIdx = candidateDistr(rng);
     while (rightSeedIdx == leftSeedIdx);
 
-    const unsigned int leftSeed = group.nodes[leftSeedIdx];
-    const unsigned int rightSeed = group.nodes[rightSeedIdx];
+    const unsigned int leftSeed = candidates[leftSeedIdx];
+    const unsigned int rightSeed = candidates[rightSeedIdx];
 
     std::set<unsigned int> leftGroup;
     leftGroup.insert(leftSeed);
