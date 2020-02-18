@@ -222,7 +222,7 @@ unsigned int growthMHV(Graph &graph, const config &config) {
         }
     }
 
-    return nbHappy;
+    return graph.getHappyVertices();
 }
 
 struct LeftRightGroup {
@@ -379,7 +379,7 @@ unsigned int twoRegular(Graph &graph) {
             continue;
         }
     }
-
+    // nbHappy is not correct for graphs containing unconnected nodes
     return graph.getHappyVertices();
 }
 

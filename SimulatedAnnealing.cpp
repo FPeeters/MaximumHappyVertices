@@ -255,21 +255,26 @@ void mergeGroup(Graph &graph, Group &group, Rng &rng) {
 }
 
 Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config) {
-    const std::vector<Group> groups = generateGroups(graph);
-
     Graph newGraph = graph;
-
-    std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
-    Group group = groups[groupDistr(rng)];
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
     const double val = splitDistr(rng);
 
-    if (val < config.splitGroupPerc)
+    if (val < config.splitGroupPerc) {
+        const std::vector<Group> groups = generateGroups(graph);
+        if (groups.size() <= 1)
+            return newGraph;
+        std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
+        Group group = groups[groupDistr(rng)];
         splitGroup(newGraph, group, rng);
-    else if (val < config.splitGroupPerc + config.swapDegreePerc)
+    } else if (val < config.splitGroupPerc + config.swapDegreePerc)
         swapDegreeBased(newGraph, rng);
     else {
+        const std::vector<Group> groups = generateGroups(graph);
+        if (groups.size() <= 1)
+            return newGraph;
+        std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
+        Group group = groups[groupDistr(rng)];
         mergeGroup(newGraph, group, rng);
     }
 

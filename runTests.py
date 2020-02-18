@@ -4,7 +4,7 @@ import subprocess
 import time
 import csv
 
-cmdArgs = sys.argv[1:] + ["-a", "simAnn", "-init", "random", "-temp", "351", "-swap", "0.21", "-split", "0.14",
+cmdArgs = sys.argv[1:] + ["-a", "simAnn", "-init", "growth", "-temp", "93", "-swap", "0", "-split", "0.27",
                           "-threads", "6", "-time", "900"]
 
 
@@ -22,14 +22,14 @@ def work(filename):
         return -1, t
 
     lines = result.stdout.split("\n")
-    gap = lines[-2]
+    # gap = lines[-2]
     happy = lines[-1]
-    return happy, t, gap
+    return happy, t, # gap
 
 
 results = []
 
-for file in glob.glob("todo/*.txt"):
+for file in glob.glob("testInstances/*.txt"):
     results.append((file.split("\\")[-1], work(file)))
 
 file = open("results.txt", "w")
