@@ -2,6 +2,8 @@ import subprocess
 import csv
 import os
 import time
+import numpy as np
+import networkx as nx
 
 
 # Adapted from https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
@@ -15,6 +17,29 @@ def print_progress(iteration, total, avg_time=0):
     if iteration == total:
         print()
 
+
+def calculate_features(filename):
+    graph = open(filename, "r")
+
+    G = nx.Graph()
+    nbColors = 0
+    nbPrecolor = 0
+
+    for line in graph:
+        split = line.split(' ')
+        if split[0] == 'p':
+            nbColors = int(split[4])
+            for i in range(nbColors):
+                G.add_node(i)
+        elif split[0] == 'e':
+            n1 = int(split[1]) - 1
+            n2 = int(split[2]) - 1
+            G.add_edge(n1, n2)
+        elif split[0] == 'n':
+            nbPrecolor += 1
+
+    return G.number_of_nodes(), G.number_of_edges(), nx.density(G), 2* G.number_of_edges() / float(G.number_of_nodes()),
+            
 
 tunedArgs = ["-a", "simAnn", "-init", "growth", "-temp", "51", "-swap", "0.06", "-split", "0.06"]
 
