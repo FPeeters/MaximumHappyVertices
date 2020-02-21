@@ -29,7 +29,7 @@ def calculate_features(filename):
         split = line.split(' ')
         if split[0] == 'p':
             nbColors = int(split[4])
-            for i in range(nbColors):
+            for i in range(int(split[2])):
                 G.add_node(i)
         elif split[0] == 'e':
             n1 = int(split[1]) - 1
@@ -37,9 +37,21 @@ def calculate_features(filename):
             G.add_edge(n1, n2)
         elif split[0] == 'n':
             nbPrecolor += 1
+    graph.close()
 
-    return G.number_of_nodes(), G.number_of_edges(), nx.density(G), 2* G.number_of_edges() / float(G.number_of_nodes()),
-            
+    degrees = np.array(G.degree)
+    centrality = np.fromiter(nx.betweenness_centrality(G).values(), dtype=int)
+    eigenvalues = np.linalg.eigvals(nx.to_numpy_matrix(G))
+    eigenvector_centrality = np.fromiter(nx.eigenvector_centrality(G).values(), dtype=float)
+    cycles = list(map(lambda x: len(x), nx.cycle_basis(G)))
+
+    return G.number_of_nodes(), G.number_of_edges(), nx.density(G), np.mean(degrees, axis=0)[1], \
+           np.std(degrees, axis=0)[1], nx.average_shortest_path_length(G), nx.diameter(
+        G), "inf" if len(cycles) == 0 else min(cycles), np.mean(centrality), np.std(
+        centrality), nx.average_clustering(G), nx.wiener_index(G), np.mean(
+        np.fromiter(map(lambda x: abs(x), eigenvalues), dtype=float)), np.std(eigenvalues), nx.algebraic_connectivity(
+        G), np.mean(eigenvector_centrality), np.std(eigenvector_centrality)
+
 
 tunedArgs = ["-a", "simAnn", "-init", "growth", "-temp", "51", "-swap", "0.06", "-split", "0.06"]
 
@@ -60,42 +72,44 @@ avgTime = -1
 emaFactor = 2 / (nbGraphs / len(nbNodes_options) + 1)
 
 print("Total graphs:", nbGraphs)
-print_progress(0, nbGraphs)
+# print_progress(0, nbGraphs)
 
-for nbNodes in nbNodes_options:
-    for nbColors in nbColor_options:
-        for preColor in preColor_options:
-            for edgeProb in edgeProb_options:
-                for seed in seed_options:
-                    t = time.time()
-                    filename = "todo/graph" + str(count) + ".txt"
-                    gen_result = subprocess.run(["cmake-build-visual-studio\\generator.exe",
-                                                 "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
-                                                 "-R", str(edgeProb), "-s", str(seed), "-f", filename],
-                                                stdout=subprocess.PIPE, universal_newlines=True)
-                    greedy_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename,
-                                                    "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-                    growth_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename,
-                                                    "-a", "growth"], stdout=subprocess.PIPE, universal_newlines=True)
-                    sim_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename] + tunedArgs,
-                                                stdout=subprocess.PIPE, universal_newlines=True)
-                    sim_result.check_returncode()
+# for nbNodes in nbNodes_options:
+#     for nbColors in nbColor_options:
+#         for preColor in preColor_options:
+#             for edgeProb in edgeProb_options:
+#                 for seed in seed_options:
+#                     t = time.time()
+#                     filename = "todo/graph" + str(count) + ".txt"
+#                     gen_result = subprocess.run(["cmake-build-visual-studio\\generator.exe",
+#                                                  "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
+#                                                  "-R", str(edgeProb), "-s", str(seed), "-f", filename],
+#                                                 stdout=subprocess.PIPE, universal_newlines=True)
+#                     greedy_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename,
+#                                                     "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+#                     growth_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename,
+#                                                     "-a", "growth"], stdout=subprocess.PIPE, universal_newlines=True)
+#                     sim_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename] + tunedArgs,
+#                                                 stdout=subprocess.PIPE, universal_newlines=True)
+#                     sim_result.check_returncode()
+#
+#                     os.remove(filename)
+#
+#                     gen = gen_result.stdout.split("\t")
+#                     greedy = greedy_result.stdout.split("\n")[-1]
+#                     growth = growth_result.stdout.split("\n")[-1]
+#                     sim = sim_result.stdout.split("\n")[-1]
+#
+#                     writer.writerow(gen[1:4] + gen[7:8] + gen[5:7] + [greedy, growth, sim])
+#
+#                     if avgTime == -1:
+#                         avgTime = time.time() - t
+#                     else:
+#                         avgTime = (time.time() - t) * emaFactor + avgTime * (1 - emaFactor)
+#
+#                     count += 1
+#                     print_progress(count, nbGraphs, avgTime)
 
-                    os.remove(filename)
-
-                    gen = gen_result.stdout.split("\t")
-                    greedy = greedy_result.stdout.split("\n")[-1]
-                    growth = growth_result.stdout.split("\n")[-1]
-                    sim = sim_result.stdout.split("\n")[-1]
-
-                    writer.writerow(gen[1:4] + gen[7:8] + gen[5:7] + [greedy, growth, sim])
-
-                    if avgTime == -1:
-                        avgTime = time.time() - t
-                    else:
-                        avgTime = (time.time() - t) * emaFactor + avgTime * (1 - emaFactor)
-
-                    count += 1
-                    print_progress(count, nbGraphs, avgTime)
+print(calculate_features("todo/graph1.txt"))
 
 file.close()
