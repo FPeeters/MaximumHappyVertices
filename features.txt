@@ -1,0 +1,19 @@
+Number of nodes: Kind of useless
+Number of edges: Usefull, but same as density/average degree (for fixed nb nodes)
+Density: Usefull, but same as number of edges/average degree
+Average degree: Usefull, but same as number of edges/density
+Std of degree: Usefull
+Average shortest path length: Maybe
+Diameter: Maybe
+Minimum cylce length: Useless
+Average centrality: Useless
+Std of centrality: Useless
+Average clustering: Maybe
+Wiener index:  Useless
+Average absolute eigenvalue: Usefull, looks same as density
+Std of eienvalues: Usefull, looks same as average absolute eigenvalue
+Algebraic connectivity: Useless
+Average eigenvector centrality: Maybe
+Std of eigenvector centrality: Maybe
+Number of Colors: Kind of useless
+Proportion of precolored vertices: Maybe
