@@ -227,7 +227,7 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(main main.cpp Graph.cpp Graph.h ConstructiveAlgs.cpp ConstructiveAlgs.h SimulatedAnnealing.cpp SimulatedAnnealing.h ExactSolver.cpp ExactSolver.h config.cpp config.h)
+add_executable(main src/main.cpp src/Graph.cpp src/Graph.h src/ConstructiveAlgs.cpp src/ConstructiveAlgs.h src/SimulatedAnnealing.cpp src/SimulatedAnnealing.h src/ExactSolver.cpp src/ExactSolver.h src/config.cpp src/config.h)
 target_link_libraries(main ilocplex)
 
 add_executable(generator generator/gen.cpp)
