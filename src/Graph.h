@@ -32,6 +32,10 @@ public:
 
     explicit Graph(const std::string &fileName);
 
+    std::pair<Graph, std::vector<unsigned int>> reduce(unsigned int &nbReduced) const;
+
+    void colorFromReduced(const std::pair<Graph, std::vector<unsigned int>> &reduced);
+
     inline Node getNode(unsigned int i) const {
         return nodes[i];
     }

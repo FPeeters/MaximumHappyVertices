@@ -208,6 +208,8 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
         if (!graph.isPreColored(node))
             nbEdges += graph.getEdges(node).size();
     }
+    if (nbEdges == 0)
+        return;
 
     std::uniform_int_distribution<unsigned int> degreeDistr(0, nbEdges - 1);
     unsigned int pickedDegree = degreeDistr(rng);

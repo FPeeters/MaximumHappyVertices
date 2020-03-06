@@ -12,31 +12,38 @@ int main(int argc, char **argv) {
 
     try {
         Graph graph(config.inputFilename);
+        unsigned int nbReduced;
+        std::pair<Graph, std::vector<unsigned int>> reduced = graph.reduce(nbReduced);
+        std::cout << "Reduced the problem to " << reduced.first.getNbNodes() << " nodes, " << nbReduced
+                  << " replacements." << std::endl;
 
         unsigned int happy = 0;
 
         switch (config.algorithm) {
             case config::GREEDY:
                 std::cout << "Executing greedy search" << std::endl;
-                happy = greedyMHV(graph);
+                happy = greedyMHV(reduced.first);
                 break;
             case config::GROWTH:
                 std::cout << "Executing growth search" << std::endl;
-                happy = growthMHV(graph, config);
+                happy = growthMHV(reduced.first, config);
                 break;
             case config::TWO_REGULAR:
                 std::cout << "Executing 2-regular exact algorithm" << std::endl;
-                happy = twoRegular(graph);
+                happy = twoRegular(reduced.first);
                 break;
             case config::SIMULATED_ANNEALING:
                 std::cout << "Executing simulated annealing" << std::endl;
-                happy = simulatedAnnealing(graph, config);
+                happy = simulatedAnnealing(reduced.first, config);
                 break;
             case config::EXACT:
                 std::cout << "Executing exact solver" << std::endl;
-                happy = solveExact(graph, config);
+                happy = solveExact(reduced.first, config);
                 break;
         }
+
+        graph.colorFromReduced(reduced);
+        happy += nbReduced;
 
         if (config.outputPngFilename != nullptr)
             graph.writeToDot(config.outputPngFilename);

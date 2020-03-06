@@ -97,6 +97,103 @@ unsigned int Graph::getHappyVertices() const {
     return count;
 }
 
+
+std::pair<Graph, std::vector<unsigned int>> Graph::reduce(unsigned int &nbReduced) const {
+    Graph reducedGraph(nbColors);
+    std::vector<unsigned int> replacements(nbNodes);
+    nbReduced = 0;
+
+    bool* reduced = (bool*)calloc(sizeof(bool), nbNodes);
+    memset(reduced, false, sizeof(bool) * nbNodes);
+    auto* references = (unsigned int*)calloc(sizeof(unsigned int), nbNodes);
+
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        if (reduced[node])
+            continue;
+        if (getEdges(node).empty()) {
+            reduced[node] = true;
+            ++nbReduced;
+            references[node] = -1;
+        } else if (!isPreColored(node) && getEdges(node).size() == 1) {
+            reduced[node] = true;
+            ++nbReduced;
+            std::vector<unsigned int> chain;
+            chain.push_back(node);
+            
+            unsigned int previous = node;
+            unsigned int next = getEdges(node)[0];
+            unsigned int anchor = -1;
+            
+            while (!isPreColored(next) && getEdges(next).size() <= 2) {
+                reduced[next] = true;
+                ++nbReduced;
+                chain.push_back(next);
+                if (getEdges(next).size() == 1) {
+                    anchor = -1;
+                    break;
+                } else {
+                    unsigned int temp = next;
+                    if (getEdges(next)[0] == previous)
+                        next = getEdges(next)[1];
+                    else
+                        next = getEdges(next)[0];
+                    previous = temp;
+                    anchor = next;
+                }
+            }
+            
+            for (unsigned int item: chain)
+                references[item] = anchor;
+        }
+    }
+
+    unsigned int nodeCounter = 0;
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        if (!reduced[node]) {
+            if (isPreColored(node))
+                reducedGraph.addNode(getColor(node));
+            else
+                reducedGraph.addNode();
+            replacements[node] = nodeCounter;
+            nodeCounter++;
+        }
+    }
+
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        if (reduced[node]) {
+            if (references[node] == -1)
+                replacements[node] = -1;
+            else
+                replacements[node] = replacements[references[node]];
+        } else {
+            for (unsigned int adj: getEdges(node)) {
+                if (!reduced[adj] && replacements[adj] < replacements[node])
+                    reducedGraph.addEdge(replacements[node], replacements[adj]);
+            }
+        }
+    }
+
+    free(reduced);
+    free(references);
+
+    return std::pair<Graph,std::vector<unsigned int>>(reducedGraph, replacements);
+}
+
+
+void Graph::colorFromReduced(const std::pair<Graph, std::vector<unsigned int>> &reduced) {
+    for (unsigned int node = 0; node < nbNodes; ++node) {
+        if (!isPreColored(node)) {
+            unsigned int reference = reduced.second[node];
+            if (reference == -1)
+                color(node, 1);
+            else
+                color(node, reduced.first.getColor(reference));
+        }
+
+    }
+}
+
+
 void Graph::writeToDot(const std::string &filename) const {
     ofstream out;
     out.open(filename + ".dot");
