@@ -13,7 +13,7 @@ def print_progress(iteration, total, avg_time=0):
     bar = '█' * filledLength + '-' * (50 - filledLength)
     avg_time_str = str(round(avg_time)) + "s"
     time_remaining = '{0:02.0f}:{1:02.0f}'.format(*divmod(avg_time * (total - iteration), 60))
-    print('\r|%s| %s%% avg: %s eta: %s' % (bar, percent, avg_time_str, time_remaining), end="")
+    print('\r|%s| %s avg: %s eta: %s' % (bar, iteration, avg_time_str, time_remaining), end="")
     if iteration == total:
         print()
 
@@ -53,9 +53,8 @@ def calculate_features(filename):
            np.std(degrees, axis=0)[1], sum([nx.average_shortest_path_length(g) for g in components]), \
            sum([nx.diameter(g) for g in components]), "inf" if len(cycles) == 0 else min(cycles), np.mean(
         centrality), np.std(centrality), nx.average_clustering(G), nx.wiener_index(G), np.mean(
-        np.fromiter(map(lambda x: abs(x), eigenvalues), dtype=float)), np.std(eigenvalues), \
-           nx.linalg.algebraicconnectivity.algebraic_connectivity(G), np.mean(eigenvector_centrality), np.std(
-        eigenvector_centrality), \
+        np.fromiter(map(lambda x: abs(x), eigenvalues), dtype=float)), np.std(eigenvalues), -1,\
+           np.mean(eigenvector_centrality), np.std(eigenvector_centrality), \
            nbColors, nbPrecolor / float(G.number_of_nodes())
 
 
@@ -64,15 +63,16 @@ tunedArgs = ["-a", "simAnn", "-init", "growth", "-temp", "51", "-swap", "0.06", 
 file = open("results.txt", "w", newline="")
 writer = csv.writer(file)
 
-nbNodes_options = [100, 200, 300]
+nbNodes_options = [100]
 nbColor_options = [5, 10, 15, 20]
 preColor_options = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
-edgeProb_options = [0.0005, 0.00075, 0.001, 0.0012, 0.0013, 0.00135, 0.0014,
-                    0.00145, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004,
-                    0.0045, 0.005, 0.0055, 0.006, 0.0065, 0.007, 0.0075,
-                    0.008, 0.0085, 0.009, 0.0095, 0.01, 0.0105, 0.011,
-                    0.0115, 0.012, 0.0125, 0.013, 0.0135, 0.014, 0.0145,
-                    0.015]
+edgeProb_options = [x / 100. for x in range(2, 100, 1)]
+# [0.0005, 0.00075, 0.001, 0.0012, 0.0013, 0.00135, 0.0014,
+#                 0.00145, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004,
+#                 0.0045, 0.005, 0.0055, 0.006, 0.0065, 0.007, 0.0075,
+#                 0.008, 0.0085, 0.009, 0.0095, 0.01, 0.0105, 0.011,
+#                 0.0115, 0.012, 0.0125, 0.013, 0.0135, 0.014, 0.0145,
+#                 0.015]
 seed_options = [1234, 4321]
 
 count = 0
