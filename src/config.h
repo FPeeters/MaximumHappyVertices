@@ -25,10 +25,11 @@ public:
     enum initAlgorithm {
         random,
         greedy,
-        growth
+        growth,
+        best
     };
     initAlgorithm initAlgorithm = random;
-    int maxIterations = 5000;
+    int maxIterations = -1;
     double initTemp = 500;
     bool outputProgress = false;
     double swapDegreePerc = 0.33;

@@ -10,22 +10,23 @@ static void printUsage() {
          << "-a ALG          Alogorithm choice, possible options:" << endl
          << "                greedy, growth, 2reg, simAnn, exact. Default: exact" << endl
          << "-r INT          Seed for the random generator. Default: 123" << endl
+         << "-time INT       Time limit in seconds for the picked algorithm. Default: -1" << endl
          << "-opng FILENAME  Name for the output image of the graph." << endl
-         << "                If not present, no image will be generated" << endl
+         << "                If not present, no image will be generated." << endl
          << "-out FILENAME   Name for the file used to print the solution to." << endl
          << "                If not present, the solution will not be outputted." << endl
          << "-minimize       The count of unhappy vertices will be printed" << endl
-         << "                Instead of the standard count of happy vertices." << endl
+         << "                instead of the standard count of happy vertices." << endl
          << endl
-         << "Options for the exact solver"
-         << "-time INT       Time limit in seconds for one execution of the exact solver" << endl
+         << "Options for the exact solver" << endl
          << "-threads INT    The amount of threads used by the exact solver." << endl
          << "                Default: The maximum amount of threads available." << endl
          << endl
          << "Options for simulated annealing" << endl
          << "-init ALG       Initial solution algotihm: possible options:" << endl
-         << "                random, greedy, growth. Default: random" << endl
-         << "-i INT          Maximum amount of iterations. Default: 5000" << endl
+         << "                random, greedy, growth, best. Default: random" << endl
+         << "-maxI INT       Maximum amount of iterations. Default: -1" << endl
+         << "                Either this or the time limit have to be set." << endl
          << "-temp DOUBLE    Initial temperature. Default: 500" << endl
          << "-progress       Flag, if present, a file progress.txt will be generated." << endl
          << "-swap DOUBLE    Chance to use the swap operator in neighbour generation." << endl
@@ -58,14 +59,14 @@ config::config(int argc, char **argv) {
                     algorithm = EXACT;
             } else if (strcmp("-r", argv[i]) == 0)
                 seed = (int) strtol(argv[++i], nullptr, 10);
+            else if (strcmp("-time", argv[i]) == 0)
+                timeLimit = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-opng", argv[i]) == 0)
                 outputPngFilename = argv[++i];
             else if (strcmp("-out", argv[i]) == 0)
                 outputFilename = argv[++i];
             else if (strcmp("-minimize", argv[i]) == 0)
                 minimize = true;
-            else if (strcmp("-time", argv[i]) == 0)
-                timeLimit = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-threads", argv[i]) == 0)
                 threads = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-init", argv[i]) == 0) {
@@ -76,7 +77,9 @@ config::config(int argc, char **argv) {
                     initAlgorithm = greedy;
                 else if (strcmp("growth", argv[i]) == 0)
                     initAlgorithm = growth;
-            } else if (strcmp("-i", argv[i]) == 0)
+                else if (strcmp("best", argv[i]) == 0)
+                    initAlgorithm = best;
+            } else if (strcmp("-maxI", argv[i]) == 0)
                 maxIterations = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-temp", argv[i]) == 0)
                 initTemp = strtod(argv[++i], nullptr);
@@ -98,6 +101,12 @@ config::config(int argc, char **argv) {
             return;
         }
 
+        if (algorithm == SIMULATED_ANNEALING) {
+            if (!(timeLimit != -1 && maxIterations == -1) && !(timeLimit == -1 && maxIterations != -1)) {
+                cout << "For simulated annealing either a time limit or a maximum amout of iterations has to be set" << endl;
+                return;
+            }
+        }
         loaded = true;
     } catch (...) {
         printUsage();

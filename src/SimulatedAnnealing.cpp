@@ -4,6 +4,7 @@
 #include <random>
 #include <queue>
 #include <fstream>
+#include <ctime>
 
 typedef std::mt19937_64 Rng;
 
@@ -85,6 +86,8 @@ void splitGroup(Graph &graph, Group &group, Rng &rng) {
     leftGroup.insert(leftSeed);
     std::set<unsigned int> rightGroup;
     rightGroup.insert(rightSeed);
+
+    std::sort(group.nodes.begin(), group.nodes.end());
 
     const std::vector<unsigned int> &leftInitEdges = graph.getEdges(leftSeed);
     std::vector<unsigned int> diffEdges(leftInitEdges.size());
@@ -311,13 +314,18 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
         case config::growth:
             growthMHV(graph, config);
             break;
+        case config::best:
+            unsigned int growth = growthMHV(graph, config);
+            Graph copy = graph;
+            if (greedyMHV(graph) < growth)
+                graph = copy;
+            break;
     }
 
     std::ofstream f;
     if (config.outputProgress)
         f.open("progress.txt");
 
-    int maxIter = config.maxIterations;
     double temperature = config.initTemp;
 
     const unsigned int nodes = graph.getNbNodes();
@@ -326,7 +334,13 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     unsigned int currBestEnergy = energy;
     Graph currBestGraph = graph;
 
-    for (int i = 0; i < maxIter; ++i) {
+    unsigned int i = 0;
+    clock_t startClock = clock();
+    clock_t maxClocks = config.timeLimit * CLOCKS_PER_SEC;
+    while ((config.maxIterations == -1 || i < config.maxIterations) &&
+           (config.timeLimit == -1 || clock() - startClock < maxClocks)) {
+        ++i;
+
         Graph neighbour = generateNeighbour(graph, rng, config);
         unsigned int newEnergy = nodes - neighbour.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
