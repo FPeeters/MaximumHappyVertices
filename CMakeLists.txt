@@ -231,3 +231,5 @@ add_executable(main src/main.cpp src/Graph.cpp src/Graph.h src/ConstructiveAlgs.
 target_link_libraries(main ilocplex)
 
 add_executable(generator generator/gen.cpp)
+
+add_executable(happyTabu happytabu/main.cpp happytabu/main.h happytabu/addprecolourings.cpp happytabu/addprecolourings.h happytabu/bounds.cpp happytabu/bounds.h happytabu/graph.cpp happytabu/graph.h happytabu/initsol.cpp happytabu/initsol.h happytabu/IO.cpp happytabu/IO.h happytabu/tabu.cpp happytabu/tabu.h)
