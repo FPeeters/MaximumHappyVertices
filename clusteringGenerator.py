@@ -4,25 +4,22 @@ import subprocess
 import os
 
 
-def acute_linear(alpha):
+def _linear_distr(alpha):
+    return (math.sqrt(alpha * alpha - 2 * alpha + 4 * alpha * random.uniform(0, 1) + 1) - 1) / alpha
+
+
+def linear_distr(alpha):
+    alpha = 2 if alpha > 2 else alpha
+    alpha = -2 if alpha < -2 else alpha
+
     if alpha == 0:
-        acute = random.uniform(0, 1)
+        return random.uniform(0, 1)
     elif alpha > 1:
-        cutoff = 2 * alpha - 3
-        acute = math.sqrt(4 * random.uniform(0, 1)) - 1
-        acute = (acute + 1) / 2.
-        acute = acute * (1 - cutoff) + cutoff
-        acute = (acute + 1) / 2.
+        return ((_linear_distr(1) + 1) * (2 - alpha) + 2 * alpha - 2) / 2
     elif alpha < -1:
-        cutoff = 2 * alpha + 3
-        acute = -math.sqrt(4 - 4 * random.uniform(0, 1)) + 1
-        acute = (acute + 1) / 2.
-        acute = acute * (cutoff + 1) - 1
-        acute = (acute + 1) / 2.
+        return (_linear_distr(-1) + 1) * (alpha + 2) / 2.
     else:
-        acute = (math.sqrt(alpha * alpha - 2 * alpha + 4 * alpha * random.uniform(0, 1) + 1) - 1) / alpha
-        acute = (acute + 1) / 2.
-    return acute
+        return (_linear_distr(alpha) + 1) / 2.
 
 
 def generate_graph(seed, nbNodes, density, cluster):
@@ -36,12 +33,12 @@ def generate_graph(seed, nbNodes, density, cluster):
     nbFilled = 0
     for _ in range(nbEdges):
         current_range = nbNodes - nbFilled
-        first = round(acute_linear(cluster) * current_range - 0.5)
+        first = round(linear_distr(cluster) * current_range - 0.5)
         if first == current_range:
             first -= 1
 
         current_range -= 1
-        second = round(acute_linear(cluster) * current_range - 0.5)
+        second = round(linear_distr(cluster) * current_range - 0.5)
         if second == current_range:
             second -= 1
         if second >= first:
@@ -89,19 +86,19 @@ def generate_image(filename, adjacency):
 
 if __name__ == '__main__':
     # import time
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-    # for alpha in [-1.75, -1.25, -0.5, 0, 0.5, 1.25, 1.75]:
-    #     a = [0 for _ in range(100)]
-    #     for _ in range(100_000):
-    #         x = acuteLinear(100, -alpha)
-    #         a[x] += 1
-    #     plt.plot(a)
-    # plt.show()
+    for alpha in [-1.75, -1.25, -0.5, 0, 0.5, 1.25, 1.75]:
+        a = [0 for _ in range(100)]
+        for _ in range(100_000):
+            x = linear_distr(-alpha)
+            a[round(x*100 - 0.5)] += 1
+        plt.plot(a)
+    plt.show()
 
-    graph = generate_graph(1, 10, 0.2, 2)
-    print(graph)
-    generate_image("out.png", graph)
+    # graph = generate_graph(1, 10, 0.2, 2)
+    # print(graph)
+    # generate_image("out.png", graph)
 
     # for i in [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.8, 1.9, 2]:
     #     t = time.time()
