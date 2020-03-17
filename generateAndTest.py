@@ -53,7 +53,7 @@ def calculate_features(filename):
            np.std(degrees, axis=0)[1], sum([nx.average_shortest_path_length(g) for g in components]), \
            sum([nx.diameter(g) for g in components]), "inf" if len(cycles) == 0 else min(cycles), np.mean(
         centrality), np.std(centrality), nx.average_clustering(G), nx.wiener_index(G), np.mean(
-        np.fromiter(map(lambda x: abs(x), eigenvalues), dtype=float)), np.std(eigenvalues), -1,\
+        np.fromiter(map(lambda x: abs(x), eigenvalues), dtype=float)), np.std(eigenvalues), -1, \
            np.mean(eigenvector_centrality), np.std(eigenvector_centrality), \
            nbColors, nbPrecolor / float(G.number_of_nodes())
 
@@ -63,16 +63,15 @@ tunedArgs = ["-a", "simAnn", "-init", "growth", "-temp", "51", "-swap", "0.06", 
 file = open("results.txt", "w", newline="")
 writer = csv.writer(file)
 
-nbNodes_options = [100]
+nbNodes_options = [1000]
 nbColor_options = [5, 10, 15, 20]
 preColor_options = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
-edgeProb_options = [x / 100. for x in range(2, 100, 1)]
-# [0.0005, 0.00075, 0.001, 0.0012, 0.0013, 0.00135, 0.0014,
-#                 0.00145, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004,
-#                 0.0045, 0.005, 0.0055, 0.006, 0.0065, 0.007, 0.0075,
-#                 0.008, 0.0085, 0.009, 0.0095, 0.01, 0.0105, 0.011,
-#                 0.0115, 0.012, 0.0125, 0.013, 0.0135, 0.014, 0.0145,
-#                 0.015]
+edgeProb_options = [0.0005, 0.00075, 0.001, 0.0012, 0.0013, 0.00135, 0.0014,
+                    0.00145, 0.0015, 0.002, 0.0025, 0.003, 0.0035, 0.004,
+                    0.0045, 0.005, 0.0055, 0.006, 0.0065, 0.007, 0.0075,
+                    0.008, 0.0085, 0.009, 0.0095, 0.01, 0.0105, 0.011,
+                    0.0115, 0.012, 0.0125, 0.013, 0.0135, 0.014, 0.0145, 0.015]
+# [x / 100. for x in range(2, 100, 1)]
 seed_options = [1234, 4321]
 
 count = 0
@@ -103,7 +102,7 @@ for nbNodes in nbNodes_options:
                                                  "-R", str(edgeProb), "-s", str(seed), "-f", filename],
                                                 stdout=subprocess.PIPE, universal_newlines=True)
 
-                    features = calculate_features(filename)
+                    # features = calculate_features(filename)
 
                     greedy_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename,
                                                     "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
@@ -111,22 +110,25 @@ for nbNodes in nbNodes_options:
                                                     "-a", "growth"], stdout=subprocess.PIPE, universal_newlines=True)
                     sim_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename] + tunedArgs,
                                                 stdout=subprocess.PIPE, universal_newlines=True)
-                    exact_t = time.time_ns()
-                    exact_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "exact",
-                                                   "-threads", "6"], stdout=subprocess.PIPE, universal_newlines=True)
-                    exact_t = (time.time_ns() - exact_t) / 1_000.0
+                    tabu_result = subprocess.run(["cmake-build-visual-studio\\happyTabu.exe", filename],
+                                                 stdout=subprocess.PIPE, universal_newlines=True)
+                    # exact_t = time.time_ns()
+                    # exact_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "exact",
+                    #                                "-threads", "6"], stdout=subprocess.PIPE, universal_newlines=True)
+                    # exact_t = (time.time_ns() - exact_t) / 1_000.0
                     os.remove(filename)
 
                     gen = gen_result.stdout.split("\t")
+                    gen[3] = str(float(gen[3]) / nbNodes)
                     greedy = greedy_result.stdout.split("\n")[-1]
                     growth = growth_result.stdout.split("\n")[-1]
                     sim = sim_result.stdout.split("\n")[-1]
-                    exact = exact_result.stdout.split("\n")[-1]
+                    # exact = exact_result.stdout.split("\n")[-1]
+                    tabu = tabu_result.stdout.split("\n")[-2].split("\t")[8]
 
-                    # [greedy, growth, sim]
-                    writer.writerow(gen[1:4] + gen[7:8] + list(map(lambda x: str(x), features)) +
-                                    [exact, exact_t, greedy, growth, sim])
-                    # writer.writerow(gen[1:4] + gen[7:8] + gen[5:7] + [greedy, growth, sim])
+                    # writer.writerow(gen[1:4] + gen[7:8] + list(map(lambda x: str(x), features)) +
+                    #                 [exact, exactTime, greedy, growth, sim])
+                    writer.writerow(gen[1:4] + gen[7:8] + gen[5:7] + [greedy, growth, sim, tabu])
 
                     if avgTime == -1:
                         avgTime = time.time() - t
