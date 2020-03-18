@@ -26,7 +26,7 @@
 ##    condition is satisfied, FALSE otherwise.
 
 # 1:            2:                   3: 4:      5:
-init            "-init "             c  ("random", "greedy", "growth")
+init            "-init "             c  ("random", "greedy", "growth", "best")
 temp            "-temp "             i  (10, 500)
 swap            "-swap "             r  (0, 1)
 split           "-split "            r  (0, 1)

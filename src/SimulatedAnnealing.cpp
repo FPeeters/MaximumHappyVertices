@@ -294,10 +294,17 @@ double swapProbability(unsigned int oldEnergy, unsigned int newEnergy, double te
     return exp(-(newEnergy - oldEnergy) / temperature);
 }
 
-double coolTemperature(double temperature, const config &config) {
-    if (temperature < 0.1)
-        return 0;
-    return temperature - (config.initTemp / (config.maxIterations * 0.95));
+double coolTemperature(const config &config, const unsigned int iteration, const clock_t clock) {
+    if (config.timeLimit != -1)
+        if (clock > 0.95 * config.timeLimit * CLOCKS_PER_SEC)
+            return 0;
+        else
+            return config.initTemp - config.initTemp / (config.timeLimit * CLOCKS_PER_SEC * 0.95) * clock;
+    else
+        if (iteration > 0.95 * config.maxIterations)
+            return 0;
+        else
+            return config.initTemp - config.initTemp / (config.maxIterations * 0.95) * iteration;
 }
 
 unsigned int simulatedAnnealing(Graph &graph, const config &config) {
@@ -337,10 +344,9 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     unsigned int i = 0;
     clock_t startClock = clock();
     clock_t maxClocks = config.timeLimit * CLOCKS_PER_SEC;
+    clock_t clocks = 0;
     while ((config.maxIterations == -1 || i < config.maxIterations) &&
-           (config.timeLimit == -1 || clock() - startClock < maxClocks)) {
-        ++i;
-
+           (config.timeLimit == -1 || clocks < maxClocks)) {
         Graph neighbour = generateNeighbour(graph, rng, config);
         unsigned int newEnergy = nodes - neighbour.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
@@ -352,10 +358,13 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
                 currBestGraph = graph;
             }
         }
-        temperature = coolTemperature(temperature, config);
+        temperature = coolTemperature(config, i, clocks);
 
         if (config.outputProgress)
             f << energy << std::endl;
+
+        ++i;
+        clocks = clock() - startClock;
     }
 
     if (config.outputProgress)

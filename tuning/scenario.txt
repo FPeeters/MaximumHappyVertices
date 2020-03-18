@@ -5,7 +5,7 @@ trainInstancesFile = "./instances-list.txt"
 
 targetRunner = "./target-runner.bat"
 
-maxExperiments = 10000
+maxExperiments = 5000
 
 forbiddenFile = "./forbidden.txt"
 parameterFile = "./parameters.txt"

@@ -7,15 +7,6 @@
 
 # Empty lines and comments are ignored.
 
-dRegular31.txt
-dRegular32.txt
-dRegular33.txt
-dRegular34.txt
-dRegular35.txt
-dRegular36.txt
-dRegular37.txt
-dRegular38.txt
-
 random31.txt
 random32.txt
 random33.txt
