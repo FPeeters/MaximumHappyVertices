@@ -17,6 +17,8 @@ static void printUsage() {
          << "                If not present, the solution will not be outputted." << endl
          << "-minimize       The count of unhappy vertices will be printed" << endl
          << "                instead of the standard count of happy vertices." << endl
+         << "-red RED        Reduction method to use, possible options:" << endl
+         << "                none, thiruvady, basic, articul. Default: articul" << endl
          << endl
          << "Options for the exact solver" << endl
          << "-threads INT    The amount of threads used by the exact solver." << endl
@@ -67,7 +69,17 @@ config::config(int argc, char **argv) {
                 outputFilename = argv[++i];
             else if (strcmp("-minimize", argv[i]) == 0)
                 minimize = true;
-            else if (strcmp("-threads", argv[i]) == 0)
+            else if (strcmp("-red", argv[i]) == 0) {
+                ++i;
+                if (strcmp("none", argv[i]) == 0)
+                    reduct = NONE;
+                else if (strcmp("thiruvady", argv[i]) == 0)
+                    reduct = THIRUVADY;
+                else if (strcmp("basic", argv[i]) == 0)
+                    reduct = BASIC;
+                else if (strcmp("articul", argv[i]) == 0)
+                    reduct = ARTICULATION;
+            } else if (strcmp("-threads", argv[i]) == 0)
                 threads = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-init", argv[i]) == 0) {
                 ++i;

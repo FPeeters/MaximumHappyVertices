@@ -4,6 +4,7 @@
 #include "SimulatedAnnealing.h"
 #include "ExactSolver.h"
 #include "config.h"
+#include "reduce.h"
 
 int main(int argc, char **argv) {
     config config(argc, argv);
@@ -12,38 +13,36 @@ int main(int argc, char **argv) {
 
     try {
         Graph graph(config.inputFilename);
-        unsigned int nbReduced;
-        std::pair<Graph, std::vector<unsigned int>> reduced = graph.reduce(nbReduced);
-        std::cout << "Reduced the problem to " << reduced.first.getNbNodes() << " nodes, " << nbReduced
-                  << " replacements." << std::endl;
+        ReducedGraph reduced(graph, config);
+        reduced.writeStats(std::cout);
 
         unsigned int happy = 0;
 
         switch (config.algorithm) {
             case config::GREEDY:
                 std::cout << "Executing greedy search" << std::endl;
-                happy = greedyMHV(reduced.first);
+                happy = greedyMHV(reduced.reducedGraph);
                 break;
             case config::GROWTH:
                 std::cout << "Executing growth search" << std::endl;
-                happy = growthMHV(reduced.first, config);
+                happy = growthMHV(reduced.reducedGraph, config);
                 break;
             case config::TWO_REGULAR:
                 std::cout << "Executing 2-regular exact algorithm" << std::endl;
-                happy = twoRegular(reduced.first);
+                happy = twoRegular(reduced.reducedGraph);
                 break;
             case config::SIMULATED_ANNEALING:
                 std::cout << "Executing simulated annealing" << std::endl;
-                happy = simulatedAnnealing(reduced.first, config);
+                happy = simulatedAnnealing(reduced.reducedGraph, config);
                 break;
             case config::EXACT:
                 std::cout << "Executing exact solver" << std::endl;
-                happy = solveExact(reduced.first, config);
+                happy = solveExact(reduced.reducedGraph, config);
                 break;
         }
 
-        graph.colorFromReduced(reduced);
-        happy += nbReduced;
+        happy += reduced.colorOriginal();
+        std::cout << graph.getHappyVertices() << std::endl;
 
         if (config.outputPngFilename != nullptr)
             graph.writeToDot(config.outputPngFilename);

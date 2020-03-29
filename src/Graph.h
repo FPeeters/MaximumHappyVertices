@@ -11,13 +11,11 @@ static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", 
 
 class Graph {
 
-    typedef std::vector<unsigned int> edgesType;
-
 public:
     struct Node {
         unsigned int color;
         bool preColored;
-        edgesType edges;
+        std::vector<unsigned int> edges;
 
         explicit Node(unsigned int color) : color(color), preColored(color != 0) {};
     };
@@ -32,10 +30,6 @@ public:
 
     explicit Graph(const std::string &fileName);
 
-    std::pair<Graph, std::vector<unsigned int>> reduce(unsigned int &nbReduced) const;
-
-    void colorFromReduced(const std::pair<Graph, std::vector<unsigned int>> &reduced);
-
     inline Node getNode(unsigned int i) const {
         return nodes[i];
     }
@@ -44,7 +38,7 @@ public:
         return nodes[i].color;
     }
 
-    inline edgesType getEdges(unsigned int i) const {
+    inline std::vector<unsigned int> getEdges(unsigned int i) const {
         return nodes[i].edges;
     }
 
@@ -62,7 +56,7 @@ public:
 
 
     inline bool hasEdge(unsigned int first, unsigned int second) const {
-        const edgesType &edges = nodes[first].edges;
+        const std::vector<unsigned int> &edges = nodes[first].edges;
         return std::find(edges.begin(), edges.end(), second) != edges.end();
     }
 
@@ -88,6 +82,11 @@ public:
             throw std::runtime_error("Node index for edge out of bounds");
         nodes[from].edges.push_back(to);
         nodes[to].edges.push_back(from);
+    }
+
+    inline void sortEdges() {
+        for (auto &node : nodes)
+            std::sort(node.edges.begin(), node.edges.end());
     }
 
     bool isHappy(unsigned int node) const;

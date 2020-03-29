@@ -17,6 +17,15 @@ public:
     int seed = 123;
     bool minimize = false;
 
+    // Reduction options
+    enum reduction {
+        NONE,
+        THIRUVADY,
+        BASIC,
+        ARTICULATION
+    };
+    reduction reduct = ARTICULATION;
+
     // Exact solver options
     int timeLimit = -1;
     int threads = 0;
