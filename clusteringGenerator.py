@@ -22,13 +22,16 @@ def linear_distr(alpha):
         return (_linear_distr(alpha) + 1) / 2.
 
 
-def generate_graph(seed, nbNodes, density, cluster):
+def generate_graph(seed, nbNodes, density, cluster, nbColors, precolorRatio):
+    nbPrecolor = round(nbNodes * precolorRatio)
+    if nbPrecolor < nbColors:
+        print("At least", nbColors, "nodes have to be precolored.")
+        return [[]]
+
     random.seed(seed)
 
-    adjacency = [[i, []] for i in range(nbNodes)]
+    adjacency = [[i, [], 0] for i in range(nbNodes)]
     nbEdges = round(nbNodes * (nbNodes - 1) * density / 2)
-
-    random.shuffle(adjacency)
 
     nbFilled = 0
     for _ in range(nbEdges):
@@ -65,6 +68,20 @@ def generate_graph(seed, nbNodes, density, cluster):
         random.shuffle(adjacency)
         adjacency.sort(key=lambda n: len(n[1]))
 
+    renames = []
+    for row in adjacency:
+        renames.append(row[0])
+    for row in adjacency:
+        row[0] = nbNodes - renames.index(row[0])
+        row[1] = [nbNodes - renames.index(x) for x in row[1]]
+
+    random.shuffle(adjacency)
+    for col in range(nbColors):
+        adjacency[col][2] = col + 1
+    for i in range(nbColors, nbPrecolor):
+        adjacency[i][2] = random.randint(1, nbColors)
+    adjacency.sort(key=lambda n: -len(n[1]))
+
     return adjacency
 
 
@@ -84,26 +101,49 @@ def generate_image(filename, adjacency):
     os.remove(filename + ".dot")
 
 
+def write_to_file(filename, adjacency, nbNodes, density, nbColors):
+    file = open(filename, "w+")
+
+    file.write("p edge " + str(nbNodes) + " " + str(round(nbNodes * (nbNodes - 1) * density / 2)) + " " + str(nbColors) + "\n")
+
+    for row in adjacency:
+        for adj in row[1]:
+            if row[0] < adj:
+                file.write("e " + str(row[0]) + " " + str(adj) + "\n")
+
+    for row in adjacency:
+        if row[2] != 0:
+            file.write("n " + str(row[0]) + " " + str(row[2]) + "\n")
+
+    file.close()
+
+
 if __name__ == '__main__':
-    # import time
+    import time
     import matplotlib.pyplot as plt
 
-    for alpha in [-1.75, -1.25, -0.5, 0, 0.5, 1.25, 1.75]:
-        a = [0 for _ in range(100)]
-        for _ in range(100_000):
-            x = linear_distr(-alpha)
-            a[round(x*100 - 0.5)] += 1
-        plt.plot(a)
-    plt.show()
+    # for alpha in [-1.75, -1.25, -0.5, 0, 0.5, 1.25, 1.75]:
+    #     a = [0 for _ in range(100)]
+    #     for _ in range(100_000):
+    #         x = linear_distr(-alpha)
+    #         a[round(x*100 - 0.5)] += 1
+    #     plt.plot(a)
+    # plt.show()
 
-    # graph = generate_graph(1, 10, 0.2, 2)
-    # print(graph)
-    # generate_image("out.png", graph)
+    graph = generate_graph(1, 10, 0.2, 0, 5, 0.7)
+    print(graph)
+    generate_image("out.png", graph)
+    write_to_file("graph.txt", graph, 10, 0.2, 5)
 
-    # for i in [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.8, 1.9, 2]:
+    # for i in [0., 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 1.8, 1.9, 2.]:
     #     t = time.time()
-    #     graph = generateGraph(1, 200, 0.1, i)
+    #     graph = generate_graph(1, 20, 0.1, i)
     #     print(time.time() - t)
     #     plt.plot([len(x[1]) for x in graph])
-    #     generateImage("plots/out" + str(i+8) + ".png", graph)
+    #     generate_image("plots/out" + str(i*4 + 8) + ".png", graph)
+    #     t = time.time()
+    #     graph = generate_graph(1, 20, 0.1, -i)
+    #     print(time.time() - t)
+    #     plt.plot([len(x[1]) for x in graph])
+    #     generate_image("plots/out" + str(-i*4 + 8) + ".png", graph)
     # plt.show()

@@ -110,9 +110,70 @@ depthFirstSearch(const Graph &graph, unsigned int node, unsigned int currentDept
         articulation[node] = false;
 }
 
+std::vector<unsigned int> buildReducedGraph(Graph &original, Graph &reduced, unsigned int *replacements) {
+    std::vector<unsigned int> references(original.getNbNodes());
+
+    unsigned int nodeCounter = 0;
+    for (unsigned int node = 0; node < original.getNbNodes(); ++node) {
+        if (replacements[node] == -2) {
+            if (original.isPreColored(node))
+                reduced.addNode(original.getColor(node));
+            else
+                reduced.addNode();
+            references[node] = nodeCounter++;
+        }
+    }
+
+    for (unsigned int node = 0; node < original.getNbNodes(); ++node) {
+        if (replacements[node] == -1)
+            references[node] = -1;
+        else if (replacements[node] != -2)
+            references[node] = references[replacements[node]];
+        else {
+            for (unsigned int adj: original.getEdges(node)) {
+                if (replacements[adj] == -2 && references[adj] < references[node])
+                    reduced.addEdge(references[node], references[adj]);
+            }
+        }
+    }
+
+    reduced.sortEdges();
+
+    return references;
+}
+
 
 void ReducedGraph::thiruvadyReduction() {
+    auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
+    std::fill_n(replacements, originalGraph.getNbNodes(), -2);
 
+    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        if (replacements[node] != -2 || originalGraph.isPreColored(node))
+            continue;
+
+        std::vector<unsigned int> freeComponent;
+        unsigned int adjReference = -1;
+        if (isInFreeComponent(originalGraph, node, freeComponent, adjReference)) {
+            for (unsigned int item: freeComponent) {
+                if (adjReference == -1)
+                    ++stats.unconnectedComponent;
+                else
+                    ++stats.singleColorComponent;
+                replacements[item] = adjReference;
+            }
+            continue;
+        }
+
+        if (onlyConnectedToUnhappyDifferentColor(originalGraph, node)) {
+            ++stats.unhappyConnections;
+            replacements[node] = -1;
+            continue;
+        }
+    }
+
+    firstReferences = buildReducedGraph(originalGraph, reducedGraph, replacements);
+
+    free(replacements);
 }
 
 void ReducedGraph::basicReduction() {
@@ -164,32 +225,7 @@ void ReducedGraph::basicReduction() {
         }
     }
 
-    unsigned int nodeCounter = 0;
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (replacements[node] == -2) {
-            if (originalGraph.isPreColored(node))
-                reducedGraph.addNode(originalGraph.getColor(node));
-            else
-                reducedGraph.addNode();
-            firstReferences[node] = nodeCounter++;
-        }
-    }
-
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (replacements[node] == -1)
-            firstReferences[node] = -1;
-        else if (replacements[node] != -2)
-            firstReferences[node] = firstReferences[replacements[node]];
-        else {
-            for (unsigned int adj: originalGraph.getEdges(node)) {
-                if (replacements[adj] == -2 && firstReferences[adj] < firstReferences[node])
-                    reducedGraph.addEdge(firstReferences[node], firstReferences[adj]);
-            }
-        }
-    }
-
-    reducedGraph.sortEdges();
-
+    firstReferences = buildReducedGraph(originalGraph, reducedGraph, replacements);
     free(replacements);
 }
 
@@ -281,36 +317,10 @@ void ReducedGraph::articulationReduction() {
     free(replacedReferences);
 
     Graph tempGraph(originalGraph.getNbColors());
-
-    unsigned int nodeCounter = 0;
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (replacements[node] == -2) {
-            if (originalGraph.isPreColored(node))
-                tempGraph.addNode(originalGraph.getColor(node));
-            else
-                tempGraph.addNode();
-            firstReferences[node] = nodeCounter++;
-        }
-    }
-
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (replacements[node] == -1)
-            firstReferences[node] = -1;
-        else if (replacements[node] != -2)
-            firstReferences[node] = firstReferences[replacements[node]];
-        else {
-            for (unsigned int adj: originalGraph.getEdges(node)) {
-                if (replacements[adj] == -2 && firstReferences[adj] < firstReferences[node])
-                    tempGraph.addEdge(firstReferences[node], firstReferences[adj]);
-            }
-        }
-    }
+    firstReferences = buildReducedGraph(originalGraph, tempGraph, replacements);
     free(replacements);
 
-
-
-
-    secondReferences.resize(tempGraph.getNbNodes(), 0);
+    secondReferences.resize(tempGraph.getNbNodes());
 
     for (unsigned int node = 0; node < tempGraph.getNbNodes(); ++node) {
         if (tempGraph.getEdges(node).empty()) {
@@ -327,7 +337,7 @@ void ReducedGraph::articulationReduction() {
         }
     }
 
-    nodeCounter = 0;
+    unsigned int nodeCounter = 0;
     for (unsigned int node = 0; node < tempGraph.getNbNodes(); ++node) {
         if (secondReferences[node] < originalGraph.getNbNodes()) {
             if (tempGraph.isPreColored(node))
@@ -353,7 +363,6 @@ void ReducedGraph::articulationReduction() {
 
 ReducedGraph::ReducedGraph(Graph &original, const config &config) : originalGraph(original),
                                                                     reducedGraph(original.getNbColors()),
-                                                                    firstReferences(original.getNbNodes()),
                                                                     mode(config.reduct) {
     switch (mode) {
         case config::NONE:
@@ -377,10 +386,16 @@ unsigned int ReducedGraph::colorOriginal() {
     switch (mode) {
         case config::NONE:
         case config::THIRUVADY:
-            for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node)
-                if (!originalGraph.isPreColored(node))
-                    originalGraph.color(node, reducedGraph.getColor(node));
-            return 0;
+            for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+                if (!originalGraph.isPreColored(node)) {
+                    unsigned int reference = firstReferences[node];
+                    if (reference == -1)
+                        originalGraph.color(node, 1);
+                    else
+                        originalGraph.color(node, reducedGraph.getColor(reference));
+                }
+            }
+            return stats.singleColorComponent + stats.unconnectedComponent;
         case config::BASIC:
             for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
                 if (!originalGraph.isPreColored(node)) {
@@ -422,13 +437,14 @@ void ReducedGraph::writeStats(std::ostream &out) {
         case config::NONE:
             break;
         case config::THIRUVADY:
-            out << "Reduce stats: " << std::endl
-                << stats.singleColorComponent << " Nodes removed from free components" << std::endl
+            out << "Thiruvady reduce stats: " << std::endl
+                << stats.unconnectedComponent << " Nodes removed from unconnected components" << std::endl
+                << stats.singleColorComponent << " Nodes removed from single color components" << std::endl
                 << stats.unhappyConnections << " Nodes removed only connected to unhappy nodes" << std::endl
                 << std::endl;
             break;
         case config::BASIC:
-            out << "Reduce stats: " << std::endl
+            out << "Basic reduce stats: " << std::endl
                 << stats.unconnectedComponent << " Nodes removed from unconnected components" << std::endl
                 << stats.singleLinkChains << " Nodes removed from single link chains" << std::endl
                 << stats.unhappyConnections << " Nodes removed only connected to unhappy nodes" << std::endl
@@ -437,7 +453,7 @@ void ReducedGraph::writeStats(std::ostream &out) {
                 << std::endl;
             break;
         case config::ARTICULATION:
-            out << "Reduce stats: " << std::endl
+            out << "Articulation reduce stats: " << std::endl
                 << stats.freeArticulation << " Nodes from free components removed in articulation phase" << std::endl
                 << stats.singleArticulation << " Nodes removed from single connection compoments in articulation phase" << std::endl
                 << stats.unhappyConnections << " Unhappy nodes removed in second phase" << std::endl
