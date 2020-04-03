@@ -13,11 +13,12 @@ struct ReduceStats {
 
     unsigned int freeArticulation = 0;
     unsigned int singleArticulation = 0;
+    unsigned int nbIterations = 0;
 };
 
 class ReducedGraph {
 private:
-    std::vector<unsigned int> firstReferences;
+    std::vector<std::vector<unsigned int>> firstReferences;
     std::vector<unsigned int> secondReferences;
     ReduceStats stats;
     config::reduction mode;

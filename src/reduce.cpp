@@ -171,7 +171,7 @@ void ReducedGraph::thiruvadyReduction() {
         }
     }
 
-    firstReferences = buildReducedGraph(originalGraph, reducedGraph, replacements);
+    firstReferences.push_back(buildReducedGraph(originalGraph, reducedGraph, replacements));
 
     free(replacements);
 }
@@ -225,7 +225,7 @@ void ReducedGraph::basicReduction() {
         }
     }
 
-    firstReferences = buildReducedGraph(originalGraph, reducedGraph, replacements);
+    firstReferences.push_back(buildReducedGraph(originalGraph, reducedGraph, replacements));
     free(replacements);
 }
 
@@ -269,89 +269,103 @@ component findComponent(const Graph &graph, unsigned int node, bool *visited, co
 }
 
 void ReducedGraph::articulationReduction() {
-    auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
-    std::fill_n(replacements, originalGraph.getNbNodes(), -2);
+    bool changesMade = true;
+    Graph currentGraph = originalGraph;
 
-    auto visited = (bool *) calloc(originalGraph.getNbNodes(), sizeof(bool));
-    auto depth = (unsigned int *) calloc(originalGraph.getNbNodes(), sizeof(unsigned int));
-    auto low = (unsigned int *) calloc(originalGraph.getNbNodes(), sizeof(unsigned int));
-    auto parent = (unsigned int *) calloc(originalGraph.getNbNodes(), sizeof(unsigned int));
-    std::fill_n(parent, originalGraph.getNbNodes(), -1);
-    auto articulation = (bool *) calloc(originalGraph.getNbNodes(), sizeof(bool));
+    while (changesMade) {
+        changesMade = false;
 
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (!visited[node])
-            depthFirstSearch(originalGraph, node, 0, visited, depth, low, parent, articulation);
-    }
+        auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * currentGraph.getNbNodes());
+        std::fill_n(replacements, currentGraph.getNbNodes(), -2);
 
-    std::fill_n(visited, originalGraph.getNbNodes(), false);
-    free(depth);
-    free(low);
-    free(parent);
+        auto visited = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
+        auto depth = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+        auto low = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+        auto parent = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+        std::fill_n(parent, currentGraph.getNbNodes(), -1);
+        auto articulation = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
 
-    auto* replacedReferences = (unsigned int *) calloc(originalGraph.getNbNodes(), sizeof(unsigned int));
-    std::fill_n(replacedReferences, originalGraph.getNbNodes(), -1);
-
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (visited[node] || articulation[node] || originalGraph.isPreColored(node))
-            continue;
-        component comp = findComponent(originalGraph, node, visited, articulation);
-
-        if (comp.nbAdj == 0 && comp.nbPrecolors == 0) {
-            stats.freeArticulation += comp.nodes.size();
-            for (unsigned int item: comp.nodes)
-                replacements[item] = comp.reference;
-        } else if (comp.nbAdj == 1 && comp.nbPrecolors == 0) {
-            stats.singleArticulation += comp.nodes.size();
-            for (unsigned int item: comp.nodes)
-                replacements[item] = comp.reference;
-        } else if (comp.nbAdj == 0 && comp.nbPrecolors == 1) {
-            stats.singleArticulation += comp.nodes.size();
-            for (unsigned int item: comp.nodes)
-                replacements[item] = comp.reference;
+        for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+            if (!visited[node])
+                depthFirstSearch(currentGraph, node, 0, visited, depth, low, parent, articulation);
         }
+
+        std::fill_n(visited, currentGraph.getNbNodes(), false);
+        free(depth);
+        free(low);
+        free(parent);
+
+        auto *replacedReferences = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+        std::fill_n(replacedReferences, currentGraph.getNbNodes(), -1);
+
+        for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+            if (visited[node] || articulation[node] || currentGraph.isPreColored(node))
+                continue;
+            component comp = findComponent(currentGraph, node, visited, articulation);
+
+            if (comp.nbAdj == 0 && comp.nbPrecolors == 0) {
+                changesMade = true;
+                stats.freeArticulation += comp.nodes.size();
+                for (unsigned int item: comp.nodes)
+                    replacements[item] = comp.reference;
+            } else if (comp.nbAdj == 1 && comp.nbPrecolors == 0) {
+                changesMade = true;
+                stats.singleArticulation += comp.nodes.size();
+                for (unsigned int item: comp.nodes)
+                    replacements[item] = comp.reference;
+            } else if (comp.nbAdj == 0 && comp.nbPrecolors == 1) {
+                changesMade = true;
+                stats.singleArticulation += comp.nodes.size();
+                for (unsigned int item: comp.nodes)
+                    replacements[item] = comp.reference;
+            }
+        }
+
+        free(visited);
+        free(articulation);
+        free(replacedReferences);
+
+        Graph nextReduced = Graph(originalGraph.getNbColors());
+        firstReferences.push_back(buildReducedGraph(currentGraph, nextReduced, replacements));
+        free(replacements);
+        currentGraph = nextReduced;
+
+        ++stats.nbIterations;
     }
 
-    free(visited);
-    free(articulation);
-    free(replacedReferences);
+    secondReferences.resize(currentGraph.getNbNodes());
 
-    Graph tempGraph(originalGraph.getNbColors());
-    firstReferences = buildReducedGraph(originalGraph, tempGraph, replacements);
-    free(replacements);
-
-    secondReferences.resize(tempGraph.getNbNodes());
-
-    for (unsigned int node = 0; node < tempGraph.getNbNodes(); ++node) {
-        if (tempGraph.getEdges(node).empty()) {
-            if (tempGraph.isPreColored(node))
-                secondReferences[node] = originalGraph.getNbNodes() + tempGraph.getColor(node);
+    for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+        if (currentGraph.getEdges(node).empty()) {
+            if (currentGraph.isPreColored(node))
+                secondReferences[node] = originalGraph.getNbNodes() + currentGraph.getColor(node);
             else
                 secondReferences[node] = -1;
             ++stats.unconnectedComponent;
         }
 
-        if (onlyConnectedToUnhappyDifferentColor(tempGraph, node)) {
+        if (onlyConnectedToUnhappyDifferentColor(currentGraph, node)) {
             secondReferences[node] = -1;
             ++stats.unhappyConnections;
         }
     }
 
     unsigned int nodeCounter = 0;
-    for (unsigned int node = 0; node < tempGraph.getNbNodes(); ++node) {
+    for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
         if (secondReferences[node] < originalGraph.getNbNodes()) {
-            if (tempGraph.isPreColored(node))
-                reducedGraph.addNode(tempGraph.getColor(node));
+            if (currentGraph.isPreColored(node))
+                reducedGraph.addNode(currentGraph.getColor(node));
             else
                 reducedGraph.addNode();
             secondReferences[node] = nodeCounter++;
         }
     }
 
-    for (unsigned int node = 0; node < tempGraph.getNbNodes(); ++node) {
+    for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
         if (secondReferences[node] < originalGraph.getNbNodes()) {
-            for (unsigned int adj: tempGraph.getEdges(node)) {
-                if (secondReferences[node] < originalGraph.getNbNodes() && secondReferences[adj] < secondReferences[node])
+            for (unsigned int adj: currentGraph.getEdges(node)) {
+                if (secondReferences[node] < originalGraph.getNbNodes() &&
+                    secondReferences[adj] < secondReferences[node])
                     reducedGraph.addEdge(secondReferences[node], secondReferences[adj]);
             }
         }
@@ -382,13 +396,12 @@ ReducedGraph::ReducedGraph(Graph &original, const config &config) : originalGrap
 }
 
 unsigned int ReducedGraph::colorOriginal() {
-    reducedGraph.writeToDot("reduced.png");
     switch (mode) {
         case config::NONE:
         case config::THIRUVADY:
             for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
                 if (!originalGraph.isPreColored(node)) {
-                    unsigned int reference = firstReferences[node];
+                    unsigned int reference = firstReferences[0][node];
                     if (reference == -1)
                         originalGraph.color(node, 1);
                     else
@@ -399,7 +412,7 @@ unsigned int ReducedGraph::colorOriginal() {
         case config::BASIC:
             for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
                 if (!originalGraph.isPreColored(node)) {
-                    unsigned int reference = firstReferences[node];
+                    unsigned int reference = firstReferences[0][node];
                     if (reference == -1)
                         originalGraph.color(node, 1);
                     else
@@ -417,14 +430,21 @@ unsigned int ReducedGraph::colorOriginal() {
                 else
                     tempColor[node] = reducedGraph.getColor(secondReferences[node]);
             }
-            for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-                if (!originalGraph.isPreColored(node)) {
-                    unsigned int reference = firstReferences[node];
+            for (unsigned int i = firstReferences.size() - 1; i < firstReferences.size(); --i) {
+                std::vector<unsigned int> references = firstReferences[i];
+                std::vector<unsigned int> nextTemp(references.size());
+                for (unsigned int node = 0; node < references.size(); ++node) {
+                    unsigned int reference = references[node];
                     if (reference == -1)
-                        originalGraph.color(node, 1);
+                        nextTemp[node] = 1;
                     else
-                        originalGraph.color(node, tempColor[reference]);
+                        nextTemp[node] = tempColor[reference];
                 }
+                tempColor = nextTemp;
+            }
+            for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+                if (!originalGraph.isPreColored(node))
+                    originalGraph.color(node, tempColor[node]);
             }
             return stats.freeArticulation + stats.singleArticulation + stats.unconnectedComponent;
     }
@@ -454,8 +474,10 @@ void ReducedGraph::writeStats(std::ostream &out) {
             break;
         case config::ARTICULATION:
             out << "Articulation reduce stats: " << std::endl
+                << stats.nbIterations << " Iterations in articulation phase" << std::endl
                 << stats.freeArticulation << " Nodes from free components removed in articulation phase" << std::endl
-                << stats.singleArticulation << " Nodes removed from single connection compoments in articulation phase" << std::endl
+                << stats.singleArticulation << " Nodes removed from single connection compoments in articulation phase"
+                << std::endl
                 << stats.unhappyConnections << " Unhappy nodes removed in second phase" << std::endl
                 << stats.unconnectedComponent << " Unconnected nodes removed in second phase" << std::endl
                 << std::endl;
