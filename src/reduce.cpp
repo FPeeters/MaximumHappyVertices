@@ -1,6 +1,5 @@
 #include <queue>
 #include <ostream>
-#include <iostream>
 #include <set>
 #include "reduce.h"
 #include "Graph.h"
@@ -31,29 +30,36 @@ std::vector<unsigned int> findChain(Graph &graph, unsigned int node, unsigned in
     return chain;
 }
 
-bool isUnhappy(Graph &graph, unsigned int node) {
-    unsigned int ownColor = graph.getColor(node);
-    for (unsigned int adj: graph.getEdges(node)) {
-        if (graph.isPreColored(adj) && graph.getColor(adj) != ownColor)
-            return true;
+status getStatus(const Graph &graph, unsigned int node) {
+    if (graph.isPreColored(node)) {
+        for (unsigned int adj: graph.getEdges(node)) {
+            if (graph.isPreColored(adj) && graph.getColor(adj) != graph.getColor(node))
+                return U;
+        }
+        return Other;
+    } else {
+        unsigned int firstAdjColor = -1;
+        for (unsigned int adj: graph.getEdges(node)) {
+            if (graph.isPreColored(adj)) {
+                if (firstAdjColor == -1)
+                    firstAdjColor = graph.getColor(adj);
+                else if (graph.getColor(adj) != firstAdjColor)
+                    return L_U;
+            }
+        }
+        return Other;
     }
-    return false;
 }
 
-bool onlyConnectedToUnhappyDifferentColor(Graph &graph, unsigned int node) {
-    unsigned int adjColor = -1;
-    bool differentColors = false;
+
+bool onlyConnectedToUnhappy(const Graph &graph, unsigned int node, const status* statuses) {
     for (unsigned int adj: graph.getEdges(node)) {
-        if (graph.isPreColored(adj) && isUnhappy(graph, adj)) {
-            if (adjColor == -1)
-                adjColor = graph.getColor(adj);
-            else if (adjColor != graph.getColor(adj))
-                differentColors = true;
-        } else
+        if (statuses[adj] == Other)
             return false;
     }
-    return differentColors;
+    return true;
 }
+
 
 bool isInFreeComponent(Graph &graph, unsigned int node, std::vector<unsigned int> &component, unsigned int &reference) {
     unsigned int adjColor = -1;
@@ -145,9 +151,12 @@ std::vector<unsigned int> buildReducedGraph(Graph &original, Graph &reduced, uns
 
 void ReducedGraph::thiruvadyReduction() {
     auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
+    auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
     std::fill_n(replacements, originalGraph.getNbNodes(), -2);
 
     for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        statuses[node] = getStatus(originalGraph, node);
+
         if (replacements[node] != -2 || originalGraph.isPreColored(node))
             continue;
 
@@ -163,13 +172,17 @@ void ReducedGraph::thiruvadyReduction() {
             }
             continue;
         }
+    }
 
-        if (onlyConnectedToUnhappyDifferentColor(originalGraph, node)) {
+
+    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        if (statuses[node] == L_U && onlyConnectedToUnhappy(originalGraph, node, statuses)) {
             ++stats.unhappyConnections;
             replacements[node] = -1;
-            continue;
         }
     }
+
+    free(statuses);
 
     firstReferences.push_back(buildReducedGraph(originalGraph, reducedGraph, replacements));
 
@@ -178,9 +191,12 @@ void ReducedGraph::thiruvadyReduction() {
 
 void ReducedGraph::basicReduction() {
     auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
+    auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
     std::fill_n(replacements, originalGraph.getNbNodes(), -2);
 
     for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        statuses[node] = getStatus(originalGraph, node);
+
         if (replacements[node] != -2)
             continue;
 
@@ -205,12 +221,6 @@ void ReducedGraph::basicReduction() {
             continue;
         }
 
-        if (onlyConnectedToUnhappyDifferentColor(originalGraph, node)) {
-            ++stats.unhappyConnections;
-            replacements[node] = -1;
-            continue;
-        }
-
         std::vector<unsigned int> freeComponent;
         unsigned int adjReference = -1;
         if (isInFreeComponent(originalGraph, node, freeComponent, adjReference)) {
@@ -224,6 +234,15 @@ void ReducedGraph::basicReduction() {
             continue;
         }
     }
+
+    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        if (statuses[node] == L_U && onlyConnectedToUnhappy(originalGraph, node, statuses)) {
+            ++stats.unhappyConnections;
+            replacements[node] = -1;
+        }
+    }
+
+    free(statuses);
 
     firstReferences.push_back(buildReducedGraph(originalGraph, reducedGraph, replacements));
     free(replacements);
@@ -335,7 +354,11 @@ void ReducedGraph::articulationReduction() {
 
     secondReferences.resize(currentGraph.getNbNodes());
 
+    auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
+
     for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+        statuses[node] = getStatus(originalGraph, node);
+
         if (currentGraph.getEdges(node).empty()) {
             if (currentGraph.isPreColored(node))
                 secondReferences[node] = originalGraph.getNbNodes() + currentGraph.getColor(node);
@@ -343,12 +366,16 @@ void ReducedGraph::articulationReduction() {
                 secondReferences[node] = -1;
             ++stats.unconnectedComponent;
         }
+    }
 
-        if (onlyConnectedToUnhappyDifferentColor(currentGraph, node)) {
-            secondReferences[node] = -1;
+    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
+        if (statuses[node] == L_U && onlyConnectedToUnhappy(originalGraph, node, statuses)) {
             ++stats.unhappyConnections;
+            secondReferences[node] = -1;
         }
     }
+
+    free(statuses);
 
     unsigned int nodeCounter = 0;
     for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {

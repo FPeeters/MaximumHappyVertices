@@ -16,6 +16,12 @@ struct ReduceStats {
     unsigned int nbIterations = 0;
 };
 
+enum status {
+    U,
+    L_U,
+    Other
+};
+
 class ReducedGraph {
 private:
     std::vector<std::vector<unsigned int>> firstReferences;
