@@ -6,13 +6,15 @@ results = [list(map(lambda x: float(x) if x != "\n" else 0., line.split(','))) f
            len(line.split(',')) != 4]
 file.close()
 
-nbBuckets = 15
+nbBuckets = 100
+
+results = [y for y in results if y[5] < 100 / (y[0] - 1.)]
 
 for precolor in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
-    x = [y[5] * (y[0] - 1.) for y in results if y[2] == precolor]
-    thiriv_reduce = [y[6] for y in results if y[2] == precolor]
-    basic_reduce = [y[7] for y in results if y[2] == precolor]
-    articul_reduce = [y[8] for y in results if y[2] == precolor]
+    x = [y[5] * (y[0] - 1.) for y in results if y[2] == precolor and y[1] == 5]
+    thiriv_reduce = [y[6] for y in results if y[2] == precolor and y[1] == 5]
+    basic_reduce = [y[7] for y in results if y[2] == precolor and y[1] == 5]
+    articul_reduce = [y[8] for y in results if y[2] == precolor and y[1] == 5]
 
     buckets = [[0., 0., 0., 0] for _ in range(nbBuckets)]
     for j in range(len(x)):
@@ -36,5 +38,5 @@ for precolor in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
     plt.legend(["Thiruvady", "Basic", "Articulation"])
     plt.ylabel("Nb of nodes reduced")
     plt.xlabel("Average degree")
-    plt.savefig("plots/reduce_" + str(precolor) + ".png")
+    plt.savefig("plots/reduce_" + str(precolor*2) + ".png")
     plt.close()

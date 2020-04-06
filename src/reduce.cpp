@@ -321,7 +321,7 @@ void ReducedGraph::articulationReduction() {
             if (visited[node] || articulation[node] || currentGraph.isPreColored(node))
                 continue;
             component comp = findComponent(currentGraph, node, visited, articulation);
-
+            
             if (comp.nbAdj == 0 && comp.nbPrecolors == 0) {
                 changesMade = true;
                 stats.freeArticulation += comp.nodes.size();
@@ -354,7 +354,7 @@ void ReducedGraph::articulationReduction() {
 
     secondReferences.resize(currentGraph.getNbNodes());
 
-    auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
+    auto *statuses = (status *) malloc(sizeof(status) * currentGraph.getNbNodes());
 
     for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
         statuses[node] = getStatus(originalGraph, node);
@@ -368,8 +368,8 @@ void ReducedGraph::articulationReduction() {
         }
     }
 
-    for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
-        if (statuses[node] == L_U && onlyConnectedToUnhappy(originalGraph, node, statuses)) {
+    for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+        if (statuses[node] == L_U && onlyConnectedToUnhappy(currentGraph, node, statuses)) {
             ++stats.unhappyConnections;
             secondReferences[node] = -1;
         }

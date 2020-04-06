@@ -38,16 +38,20 @@ def run_instance(filename, nbNodes, nbColors, preColor, degree, cluster, seed):
     articul_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-red", "articul",
                                     "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
 
-    os.remove(filename)
+    try:
+        gen = gen_result.stdout.split("\t")
+        gen[3] = str(float(gen[3]) / nbNodes)
+        gen = gen[1:4] + gen[7:8] + gen[5:7]
+        thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
+        basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
+        articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
 
-    gen = gen_result.stdout.split("\t")
-    gen[3] = str(float(gen[3]) / nbNodes)
-    gen = gen[1:4] + gen[7:8] + gen[5:7]
-    thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
-    basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
-    articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
+        os.remove(filename)
+        return gen + [thiruv, basic, articul], time.time() - t
+    except:
+        print("An error occured")
+        return [], time.time() - t
 
-    return gen + [thiruv, basic, articul], time.time() - t
 
 
 def callback(result):
@@ -76,7 +80,7 @@ if __name__ == '__main__':
     writer = csv.writer(file)
 
     nbNodes_options = [1000]
-    nbColor_options = [5, 10, 15, 20]
+    nbColor_options = [5 , 10, 15, 20]
     preColor_options = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
     degree_options = range(0, 1000)
     cluster_options = [0]

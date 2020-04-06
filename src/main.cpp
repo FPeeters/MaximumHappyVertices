@@ -6,6 +6,7 @@
 #include "config.h"
 #include "reduce.h"
 
+
 int main(int argc, char **argv) {
     config config(argc, argv);
     if (!config.loaded)
@@ -42,7 +43,7 @@ int main(int argc, char **argv) {
         }
 
         happy += reduced.colorOriginal();
-        std::cout << graph.getHappyVertices() << std::endl;
+//        std::cout << graph.getHappyVertices() << std::endl;
 
         if (config.outputPngFilename != nullptr)
             graph.writeToDot(config.outputPngFilename);
