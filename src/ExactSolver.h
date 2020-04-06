@@ -6,6 +6,4 @@
 
 unsigned int solveExact(Graph &graph, const config &config);
 
-unsigned int solveExactAlt(Graph &graph);
-
 #endif //MAXHAPPYVERTS_EXACTSOLVER_H

@@ -6,8 +6,8 @@ project(MaxHappyVerts)
 include(FindPackageHandleStandardArgs)
 
 # Find the path to CPLEX Studio.
-
-set(CPLEX_ILOG_DIRS "D:/Programs/IBM/ILOG" "C:/Program Files/IBM/ILOG")
+# Add the installation folder of IBM ILOG here if available
+set(CPLEX_ILOG_DIRS  "D:/Programs/IBM/ILOG" "C:/Program Files/IBM/ILOG")
 set(CPLEX_ARCH x64)
 
 if (NOT CPLEX_STUDIO_DIR)
@@ -228,7 +228,11 @@ endif ()
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(main src/main.cpp src/Graph.cpp src/Graph.h src/ConstructiveAlgs.cpp src/ConstructiveAlgs.h src/SimulatedAnnealing.cpp src/SimulatedAnnealing.h src/ExactSolver.cpp src/ExactSolver.h src/config.cpp src/config.h src/reduce.cpp src/reduce.h)
-target_link_libraries(main ilocplex)
+
+if (CPLEX_FOUND)
+    target_link_libraries(main ilocplex)
+    target_compile_definitions(main PUBLIC CPLEX_FOUND)
+endif()
 
 add_executable(generator generator/gen.cpp)
 

@@ -1,29 +1,18 @@
+#include "ExactSolver.h"
+#include <iostream>
+
+#ifndef CPLEX_FOUND
+
+unsigned int solveExact(Graph &graph, const config &config) {
+    std::cout << "Exact solver was not loaded during compiling" << std::endl;
+    return 0;
+}
+
+#else
+
 #include <ilconcert/iloenv.h>
 #include <ilconcert/ilomodel.h>
 #include <ilcplex/ilocplexi.h>
-#include "ExactSolver.h"
-
-void
-checkConstraints(const Graph &graph, const IloIntVarArray &xArr, const IloBoolVarArray &yArr, const IloCplex &cplex) {
-    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
-        IloNum nodeColor = cplex.getValue(xArr[node]);
-        auto col = (unsigned int) round(cplex.getValue(xArr[node]));
-        auto realCol = (unsigned int) cplex.getValue(xArr[node]);
-        if (col != realCol)
-            std::cout << "Conversion error for node " << node << std::endl;
-
-        for (auto adj: graph.getEdges(node)) {
-            IloNum adjColor = cplex.getValue(xArr[adj]);
-            if (abs(nodeColor - adjColor) > 1e-9 && abs(cplex.getValue(yArr[node]) - 1) > 1e-9) {
-
-                std::cout << "Violated edge contraint " << node << " -> " << adj;
-                std::cout << " | " << nodeColor << " " << adjColor << " " << cplex.getValue(yArr[node]) << std::endl;
-            }
-        }
-    }
-
-    std::cout << "Objective value: " << graph.getNbNodes() - cplex.getObjValue() << std::endl;
-}
 
 unsigned int solveExact(Graph &graph, const config &config) {
     IloEnv env;
@@ -75,8 +64,4 @@ unsigned int solveExact(Graph &graph, const config &config) {
     return happy;
 }
 
-
-unsigned int solveExactAlt(Graph &graph) {
-
-    return graph.getHappyVertices();
-}
+#endif // CPLEX_FOUND
