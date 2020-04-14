@@ -35,6 +35,7 @@ for precolor in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
     plt.figure()
     plt.plot(indices, buckets)
 
+    plt.title("Precolor= " + str(precolor))
     plt.legend(["Thiruvady", "Basic", "Articulation"])
     plt.ylabel("Nb of nodes reduced")
     plt.xlabel("Average degree")

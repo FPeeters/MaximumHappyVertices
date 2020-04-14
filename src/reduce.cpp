@@ -425,6 +425,7 @@ ReducedGraph::ReducedGraph(Graph &original, const config &config) : originalGrap
 unsigned int ReducedGraph::colorOriginal() {
     switch (mode) {
         case config::NONE:
+            return 0;
         case config::THIRUVADY:
             for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
                 if (!originalGraph.isPreColored(node)) {

@@ -24,6 +24,8 @@ static void printUsage() {
          << "-threads INT    The amount of threads used by the exact solver." << endl
          << "                Default: The maximum amount of threads available." << endl
          << endl
+         << "Options for the growth algorithm" << endl
+         << "-selectRandom   If present, the growth algorithm will select nodes randomly" << endl
          << "Options for simulated annealing" << endl
          << "-init ALG       Initial solution algotihm: possible options:" << endl
          << "                random, greedy, growth, best. Default: random" << endl
@@ -81,6 +83,8 @@ config::config(int argc, char **argv) {
                     reduct = ARTICULATION;
             } else if (strcmp("-threads", argv[i]) == 0)
                 threads = (int) strtol(argv[++i], nullptr, 10);
+            else if (strcmp("-selectRandom", argv[i]) == 0)
+                randomSelection = true;
             else if (strcmp("-init", argv[i]) == 0) {
                 ++i;
                 if (strcmp("random", argv[i]) == 0)

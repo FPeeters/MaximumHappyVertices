@@ -30,6 +30,9 @@ public:
     int timeLimit = -1;
     int threads = 0;
 
+    // Growth options
+    bool randomSelection = false;
+
     // Simulated annealing options
     enum initAlgorithm {
         random,

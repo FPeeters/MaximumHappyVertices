@@ -69,6 +69,56 @@ node_status determineFreeStatus(const Graph &graph, const unsigned int node, con
         return Lf;
 }
 
+unsigned int getNextRandom(Rng &rng, const Graph &graph, const std::vector<node_status> &labels,
+                     bool &pVertex, bool &lhVertex, bool &luVertex) {
+    pVertex = lhVertex = luVertex = false;
+
+    std::vector<unsigned int> pNodes;
+    std::vector<unsigned int> lhNodes;
+    std::vector<unsigned int> luNodes;
+    std::vector<unsigned int> lfNodes;
+
+    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+        switch (labels[node]) {
+            case PotentiallyHappy:
+                pNodes.push_back(node);
+                continue;
+            case Lh:
+                lhNodes.push_back(node);
+                continue;
+            case Lu:
+                luNodes.push_back(node);
+                continue;
+            case Lf:
+                lfNodes.push_back(node);
+                break;
+            default:
+                continue;
+        }
+    }
+
+    if (!pNodes.empty()) {
+        std::uniform_int_distribution<unsigned int> selectDistr(0, pNodes.size() - 1);
+        pVertex = true;
+        return pNodes[selectDistr(rng)];
+    }
+
+    if (!lhNodes.empty()) {
+        std::uniform_int_distribution<unsigned int> selectDistr(0, lhNodes.size() - 1);
+        lhVertex = true;
+        return lhNodes[selectDistr(rng)];
+    }
+
+    if (!luNodes.empty()) {
+        std::uniform_int_distribution<unsigned int> selectDistr(0, luNodes.size() - 1);
+        luVertex = true;
+        return luNodes[selectDistr(rng)];
+    }
+
+    std::uniform_int_distribution<unsigned int> selectDistr(0, lfNodes.size() - 1);
+    return lfNodes[selectDistr(rng)];
+}
+
 unsigned int getNext(const Graph &graph, const std::vector<node_status> &labels,
                      bool &pVertex, bool &lhVertex, bool &luVertex) {
     pVertex = lhVertex = luVertex = false;
@@ -104,6 +154,7 @@ unsigned int getNext(const Graph &graph, const std::vector<node_status> &labels,
         return lfVertexIdx;
 }
 
+// Actually updates nodes up to 3 edges away
 void updateDistanceTwo(const Graph &graph, const unsigned int node, std::vector<node_status> &labels,
                        unsigned int &nbHappy) {
     labels[node] = Happy;
@@ -178,7 +229,12 @@ unsigned int growthMHV(Graph &graph, const config &config) {
 
     bool pVertex, lhVertex, luVertex;
     while (numColored < graph.getNbNodes()) {
-        unsigned int next = getNext(graph, labels, pVertex, lhVertex, luVertex);
+        unsigned int next;
+        if (config.randomSelection)
+            next = getNextRandom(rng, graph, labels, pVertex, lhVertex, luVertex);
+        else
+            next = getNext(graph, labels, pVertex, lhVertex, luVertex);
+
         unsigned int col;
 
         if (pVertex) {
@@ -222,6 +278,7 @@ unsigned int growthMHV(Graph &graph, const config &config) {
         }
     }
 
+    // nbHappy doesn't count correctly
     return graph.getHappyVertices();
 }
 
