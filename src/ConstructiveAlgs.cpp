@@ -1,6 +1,7 @@
 #include <random>
 #include <queue>
 #include "ConstructiveAlgs.h"
+#include "linear_int_distribution.h"
 
 typedef std::mt19937_64 Rng;
 
@@ -69,8 +70,8 @@ node_status determineFreeStatus(const Graph &graph, const unsigned int node, con
         return Lf;
 }
 
-unsigned int getNextRandom(Rng &rng, const Graph &graph, const std::vector<node_status> &labels,
-                     bool &pVertex, bool &lhVertex, bool &luVertex) {
+unsigned int getNextRandom(Rng &rng, const Graph &graph, const double alpha, const std::vector<node_status> &labels,
+                           bool &pVertex, bool &lhVertex, bool &luVertex) {
     pVertex = lhVertex = luVertex = false;
 
     std::vector<unsigned int> pNodes;
@@ -98,24 +99,24 @@ unsigned int getNextRandom(Rng &rng, const Graph &graph, const std::vector<node_
     }
 
     if (!pNodes.empty()) {
-        std::uniform_int_distribution<unsigned int> selectDistr(0, pNodes.size() - 1);
+        linear_int_distribution<unsigned int> selectDistr(alpha, 0, pNodes.size());
         pVertex = true;
         return pNodes[selectDistr(rng)];
     }
 
     if (!lhNodes.empty()) {
-        std::uniform_int_distribution<unsigned int> selectDistr(0, lhNodes.size() - 1);
+        linear_int_distribution<unsigned int> selectDistr(alpha, 0, lhNodes.size());
         lhVertex = true;
         return lhNodes[selectDistr(rng)];
     }
 
     if (!luNodes.empty()) {
-        std::uniform_int_distribution<unsigned int> selectDistr(0, luNodes.size() - 1);
+        linear_int_distribution<unsigned int> selectDistr(alpha, 0, luNodes.size());
         luVertex = true;
         return luNodes[selectDistr(rng)];
     }
 
-    std::uniform_int_distribution<unsigned int> selectDistr(0, lfNodes.size() - 1);
+    linear_int_distribution<unsigned int> selectDistr(alpha, 0, lfNodes.size());
     return lfNodes[selectDistr(rng)];
 }
 
@@ -231,7 +232,7 @@ unsigned int growthMHV(Graph &graph, const config &config) {
     while (numColored < graph.getNbNodes()) {
         unsigned int next;
         if (config.randomSelection)
-            next = getNextRandom(rng, graph, labels, pVertex, lhVertex, luVertex);
+            next = getNextRandom(rng, graph, config.alpha, labels, pVertex, lhVertex, luVertex);
         else
             next = getNext(graph, labels, pVertex, lhVertex, luVertex);
 
@@ -278,7 +279,7 @@ unsigned int growthMHV(Graph &graph, const config &config) {
         }
     }
 
-    // nbHappy doesn't count correctly
+    // nbHappy is not correct for graphs containing unconnected nodes
     return graph.getHappyVertices();
 }
 
@@ -436,7 +437,7 @@ unsigned int twoRegular(Graph &graph) {
             continue;
         }
     }
-    // nbHappy is not correct for graphs containing unconnected nodes
+
     return graph.getHappyVertices();
 }
 

@@ -32,6 +32,7 @@ public:
 
     // Growth options
     bool randomSelection = false;
+    double alpha = 0;
 
     // Simulated annealing options
     enum initAlgorithm {

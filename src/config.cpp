@@ -26,6 +26,8 @@ static void printUsage() {
          << endl
          << "Options for the growth algorithm" << endl
          << "-selectRandom   If present, the growth algorithm will select nodes randomly" << endl
+         << "-alpha DOUBLE   The bias parameter for the linear distribution in the" << endl
+         << "                 random selector. Range: [-2, 2]. Default: 0" << endl
          << "Options for simulated annealing" << endl
          << "-init ALG       Initial solution algotihm: possible options:" << endl
          << "                random, greedy, growth, best. Default: random" << endl
@@ -85,6 +87,8 @@ config::config(int argc, char **argv) {
                 threads = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-selectRandom", argv[i]) == 0)
                 randomSelection = true;
+            else if (strcmp("-alpha", argv[i]) == 0)
+                alpha = strtod(argv[++i], nullptr);
             else if (strcmp("-init", argv[i]) == 0) {
                 ++i;
                 if (strcmp("random", argv[i]) == 0)
@@ -123,6 +127,12 @@ config::config(int argc, char **argv) {
                 return;
             }
         }
+
+        if (alpha < -2 || alpha > 2) {
+            cout << "The allowed range for alpha is [-2, 2]" << endl;
+            return;
+        }
+
         loaded = true;
     } catch (...) {
         printUsage();
