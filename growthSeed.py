@@ -35,21 +35,30 @@ def run_instance(filename, nbNodes, nbColors, preColor, degree, cluster, seed):
     # clusteringGenerator.write_to_file(filename, graph, nbNodes, degree / (nbNodes - 1.), nbColors)
     # gen = [nbNodes, nbColors, preColor, seed, degree, cluster]
 
-    happy = np.ndarray((SAMPLES,))
+    stats = []
 
-    for i in range(SAMPLES):
-        result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
-                                 "-red", "none", "-selectRandom", "-r", str(random.randint(0, 2 ** 16))],
-                                stdout=subprocess.PIPE, universal_newlines=True)
-        happy[i] = int(result.stdout.split("\n")[-1])
+    for alpha in [-2., -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.]:
+        happy = np.ndarray((SAMPLES,))
+        for i in range(SAMPLES):
+            result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+                                     "-red", "none", "-selectRandom", "-alpha", str(alpha),
+                                     "-r", str(random.randint(0, 2 ** 16))],
+                                    stdout=subprocess.PIPE, universal_newlines=True)
+            happy[i] = int(result.stdout.split("\n")[-1])
+            if alpha == -2. or alpha == 2.:
+                break
+        if alpha == -2. or alpha == 2.:
+            stats += [str(happy[0]), "0.0", str(happy[0])]
+        else:
+            stats += [str(np.average(happy)), str(np.std(happy)), str(np.max(happy))]
 
     result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
-                            "-red", "none"],
+                             "-red", "none"],
                             stdout=subprocess.PIPE, universal_newlines=True)
 
     lewis = int(result.stdout.split("\n")[-1])
     os.remove(filename)
-    return gen + [lewis, np.average(happy), np.std(happy), np.max(happy)], time.time() - t
+    return gen + [str(lewis)] + stats, time.time() - t
 
 
 def callback(result):
@@ -70,7 +79,7 @@ avgTime = -1
 emaFactor = 0
 lock = Lock()
 threads = 6
-SAMPLES = 1000
+SAMPLES = 250
 
 if __name__ == '__main__':
     file = open("results.txt", "w", newline="")
@@ -79,12 +88,12 @@ if __name__ == '__main__':
     nbNodes_options = [1000]
     nbColor_options = [5, 10, 15, 20]
     preColor_options = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
-    degree_options = [float(x) for x in range(100)]
+    degree_options = [float(x) for x in range(30)]
     cluster_options = [0]
     seed_options = [1234, 4321]
 
-    nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * \
-               len(degree_options) * len(cluster_options) * len(seed_options)
+    nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * len(degree_options) * len(
+        cluster_options) * len(seed_options)
     emaFactor = 2 / (nbGraphs / len(nbNodes_options) + 1)
 
     print("Total graphs:", nbGraphs)
@@ -107,7 +116,8 @@ if __name__ == '__main__':
                                 continue
 
                             filename = "todo/graph" + str(fileCount) + ".txt"
-                            pool.apply_async(run_instance, (filename, nbNodes, nbColors, preColor, degree, cluster, seed),
+                            pool.apply_async(run_instance,
+                                             (filename, nbNodes, nbColors, preColor, degree, cluster, seed),
                                              callback=callback)
 
     pool.close()
