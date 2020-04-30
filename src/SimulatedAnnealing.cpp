@@ -175,34 +175,35 @@ void splitGroup(Graph &graph, Group &group, Rng &rng) {
         --nbNodes;
     }
 
-    if (group.adjColors.size() == 1) {
-        std::uniform_real_distribution<double> pickDistr(0, 1);
-        if (pickDistr(rng) < 0.5)
-            for (unsigned int leftNode: leftGroup)
-                graph.color(leftNode, *group.adjColors.begin());
-
-        else
-            for (unsigned int rightNode: rightGroup)
-                graph.color(rightNode, *group.adjColors.begin());
-
-    } else {
-        std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
-        unsigned int nbColor = colorDistr(rng);
-        auto it = group.adjColors.begin();
-        for (; nbColor != 0; --nbColor) it++;
-        unsigned int color = *it;
-
-        for (unsigned int leftNode: leftGroup)
-            graph.color(leftNode, color);
-
-        nbColor = colorDistr(rng);
-        it = group.adjColors.begin();
-        for (; nbColor != 0; --nbColor) it++;
-        color = *it;
-
-        for (unsigned int rightNode: rightGroup)
-            graph.color(rightNode, color);
+    std::set<unsigned int> adjColors;
+    for (unsigned int node: leftGroup) {
+        for (unsigned int adj: graph.getEdges(node))
+            adjColors.insert(graph.getColor(adj));
     }
+
+    std::uniform_int_distribution<unsigned int> colorDistr(0, adjColors.size() - 1);
+    unsigned int nbColor = colorDistr(rng);
+    auto it = adjColors.begin();
+    for (; nbColor != 0; --nbColor) it++;
+    unsigned int color = *it;
+
+    for (unsigned int node: leftGroup)
+        graph.color(node, color);
+
+    adjColors.clear();
+    for (unsigned int node: rightGroup) {
+        for (unsigned int adj: graph.getEdges(node))
+            adjColors.insert(graph.getColor(adj));
+    }
+
+    colorDistr = std::uniform_int_distribution<unsigned int>(0, adjColors.size() - 1);
+    nbColor = colorDistr(rng);
+    it = adjColors.begin();
+    for (; nbColor != 0; --nbColor) it++;
+    color = *it;
+
+    for (unsigned int node: rightGroup)
+        graph.color(node, color);
 }
 
 void swapDegreeBased(Graph &graph, Rng &rng) {
@@ -296,15 +297,14 @@ double swapProbability(unsigned int oldEnergy, unsigned int newEnergy, double te
 
 double coolTemperature(const config &config, const unsigned int iteration, const clock_t clock) {
     if (config.timeLimit != -1)
-        if (clock > 0.95 * config.timeLimit * CLOCKS_PER_SEC)
+        if (clock > (1 - config.zeroIterations) * config.timeLimit * CLOCKS_PER_SEC)
             return 0;
         else
-            return config.initTemp - config.initTemp / (config.timeLimit * CLOCKS_PER_SEC * 0.95) * clock;
+            return config.initTemp - config.initTemp / (config.timeLimit * CLOCKS_PER_SEC * (1 - config.zeroIterations)) * clock;
+    else if (iteration > (1 - config.zeroIterations) * config.maxIterations)
+        return 0;
     else
-        if (iteration > 0.95 * config.maxIterations)
-            return 0;
-        else
-            return config.initTemp - config.initTemp / (config.maxIterations * 0.95) * iteration;
+        return config.initTemp - config.initTemp / (config.maxIterations * (1 - config.zeroIterations)) * iteration;
 }
 
 unsigned int simulatedAnnealing(Graph &graph, const config &config) {

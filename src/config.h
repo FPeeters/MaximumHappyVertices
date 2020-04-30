@@ -29,6 +29,7 @@ public:
     // Exact solver options
     int timeLimit = -1;
     int threads = 0;
+    bool altModel = false;
 
     // Growth options
     bool randomSelection = false;
@@ -44,6 +45,7 @@ public:
     initAlgorithm initAlgorithm = random;
     int maxIterations = -1;
     double initTemp = 500;
+    double zeroIterations = 0.05;
     bool outputProgress = false;
     double swapDegreePerc = 0.33;
     double splitGroupPerc = 0.33;
