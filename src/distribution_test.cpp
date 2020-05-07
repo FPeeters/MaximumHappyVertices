@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <iostream>
+#include <algorithm>
 #include "linear_int_distribution.h"
 
 int main(int argc, char **argv) {

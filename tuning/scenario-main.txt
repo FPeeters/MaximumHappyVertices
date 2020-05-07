@@ -1,14 +1,14 @@
 execDir = "../"
 
 trainInstancesDir = "../testInstances"
-trainInstancesFile = "./instances-list.txt"
+trainInstancesFile = "./instances-list-main.txt"
 
-targetRunner = "./target-runner.bat"
+targetRunner = "./target-runner-main"
 
 maxExperiments = 5000
 
-forbiddenFile = "./forbidden.txt"
-parameterFile = "./parameters.txt"
+forbiddenFile = "./forbidden-main.txt"
+parameterFile = "./parameters-main.txt"
 
 digits = 2
 

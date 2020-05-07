@@ -105,9 +105,9 @@ depthFirstSearch(const Graph &graph, unsigned int node, unsigned int currentDept
             depthFirstSearch(graph, adj, currentDepth + 1, visited, depth, low, parent, articulation);
             if (low[adj] >= depth[node])
                 articulation[node] = true;
-            low[node] = __min(low[node], low[adj]);
+            low[node] = std::min(low[node], low[adj]);
         } else if (adj != parent[node])
-            low[node] = __min(low[node], depth[adj]);
+            low[node] = std::min(low[node], depth[adj]);
     }
 
     if (parent[node] == -1)

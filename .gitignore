@@ -32,7 +32,7 @@
 *.app
 
 .idea/
-cmake-build-*/
+cmake-build*/
 
 *.vs/
 out/
