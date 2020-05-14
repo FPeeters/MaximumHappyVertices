@@ -20,38 +20,42 @@ def print_progress(iteration, total, avg_time=0):
 
 def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, seed):
     t = time.time()
-    if method == "random":
-        gen_result = subprocess.run(["cmake-build-visual-studio\\generator.exe",
-                                     "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
-                                     "-R", str(degree / (nbNodes - 1.)), "-s", str(seed), "-f", filename],
-                                    stdout=subprocess.PIPE, universal_newlines=True)
-        gen = gen_result.stdout.split("\t")
-        gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
-    elif method == "cluster":
-        subprocess.run(["cmake-build-visual-studio\\clusteringGenerator.exe", filename, str(nbNodes), str(degree),
-                        str(alpha), str(nbColors), str(preColor), str(seed)])
-        gen = [nbNodes, nbColors, preColor, seed, degree, alpha]
-    else:
-        gen_result = subprocess.run(["cmake-build-visual-studio\\generator.exe",
-                                     "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
-                                     "-S", str(degree), "-s", str(seed), "-f", filename],
-                                    stdout=subprocess.PIPE, universal_newlines=True)
-        gen = gen_result.stdout.split("\t")
-        gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
+    try:
+        if method == "random":
+            gen_result = subprocess.run(
+                [exe_dir + os.path.sep + "generator", "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
+                 "-R", str(degree / (nbNodes - 1.)), "-s", str(seed), "-f", filename],
+                stdout=subprocess.PIPE, universal_newlines=True)
+            gen = gen_result.stdout.split("\t")
+            gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
+        elif method == "cluster":
+            subprocess.run([exe_dir + os.path.sep + "clusteringGenerator", filename, str(nbNodes), str(degree),
+                            str(alpha), str(nbColors), str(preColor), str(seed)])
+            gen = [nbNodes, nbColors, preColor, seed, degree, alpha]
+        else:
+            gen_result = subprocess.run(
+                [exe_dir + os.path.sep + "generator", "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
+                 "-S", str(degree), "-s", str(seed), "-f", filename],
+                stdout=subprocess.PIPE, universal_newlines=True)
+            gen = gen_result.stdout.split("\t")
+            gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
 
-    thiruv_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-red", "thiruvady",
-                                    "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-    basic_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-red", "basic",
-                                   "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-    articul_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-red", "articul",
-                                     "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        thiruv_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "thiruvady",
+                                        "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        basic_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "basic",
+                                       "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        articul_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "articul",
+                                         "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
 
-    thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
-    basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
-    articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
+        thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
+        basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
+        articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
 
-    os.remove(filename)
-    return [method] + gen + [thiruv, basic, articul], time.time() - t
+        os.remove(filename)
+        return [method] + gen + [thiruv, basic, articul], time.time() - t
+    except Exception as e:
+        print(e)
+        return [], time.time() - t
 
 
 def callback(result):
@@ -74,6 +78,9 @@ emaFactor = 0
 threads = 4
 lock = Lock()
 
+exe_dir = "cmake-build-visual-studio"
+# exe_dir = "cmake-build"
+
 if __name__ == '__main__':
     file = open("results.txt", "w", newline="")
     writer = csv.writer(file)
@@ -90,7 +97,7 @@ if __name__ == '__main__':
                     7074, 2605, 9193]
 
     nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * (
-                len(degree_options) * (1 + len(alpha_options)) + len(scale_options)) * len(seed_options)
+            len(degree_options) * (1 + len(alpha_options)) + len(scale_options)) * len(seed_options)
     emaFactor = 2 / (nbGraphs / len(nbNodes_options) + 1)
 
     print("Total graphs:", nbGraphs)
