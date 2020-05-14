@@ -239,3 +239,5 @@ add_executable(distribution_test src/distribution_test.cpp src/linear_int_distri
 add_executable(generator generator/gen.cpp)
 
 add_executable(happyTabu happytabu/main.cpp happytabu/main.h happytabu/addprecolourings.cpp happytabu/addprecolourings.h happytabu/bounds.cpp happytabu/bounds.h happytabu/graph.cpp happytabu/graph.h happytabu/initsol.cpp happytabu/initsol.h happytabu/IO.cpp happytabu/IO.h happytabu/tabu.cpp happytabu/tabu.h)
+
+add_executable(clusteringGenerator src/clusteringGenerator.cpp src/linear_int_distribution.h)
