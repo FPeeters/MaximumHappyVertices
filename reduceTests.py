@@ -26,26 +26,33 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
                 [exe_dir + os.path.sep + "generator", "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
                  "-R", str(degree / (nbNodes - 1.)), "-s", str(seed), "-f", filename],
                 stdout=subprocess.PIPE, universal_newlines=True)
+            gen_result.check_returncode()
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
         elif method == "cluster":
-            subprocess.run([exe_dir + os.path.sep + "clusteringGenerator", filename, str(nbNodes), str(degree),
-                            str(alpha), str(nbColors), str(preColor), str(seed)])
+            gen_result = subprocess.run(
+                [exe_dir + os.path.sep + "clusteringGenerator", filename, str(nbNodes), str(degree),
+                 str(alpha), str(nbColors), str(preColor), str(seed)])
+            gen_result.check_returncode()
             gen = [nbNodes, nbColors, preColor, seed, degree, alpha]
         else:
             gen_result = subprocess.run(
                 [exe_dir + os.path.sep + "generator", "-n", str(nbNodes), "-k", str(nbColors), "-p", str(preColor),
                  "-S", str(degree), "-s", str(seed), "-f", filename],
                 stdout=subprocess.PIPE, universal_newlines=True)
+            gen_result.check_returncode()
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
 
         thiruv_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "thiruvady",
                                         "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        thiruv_result.check_returncode()
         basic_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "basic",
                                        "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        basic_result.check_returncode()
         articul_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "articul",
                                          "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
+        articul_result.check_returncode()
 
         thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
         basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <fstream>
+#include <algorithm>
 #include "linear_int_distribution.h"
 
 typedef std::mt19937_64 Rng;
@@ -92,7 +93,6 @@ int main(int argc, char **argv) {
         if (secondAdj.size() == nbNodes - 1)
             ++nbFilled;
 
-        std::shuffle(adjacency.begin(), adjacency.end(), rng);
         std::sort(adjacency.begin(), adjacency.end(), compare);
     }
 
