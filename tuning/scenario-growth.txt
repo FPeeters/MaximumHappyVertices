@@ -1,0 +1,17 @@
+execDir = "../"
+
+trainInstancesDir = "../testInstances"
+trainInstancesFile = "./instances-list.txt"
+
+# Linux
+#targetRunner = "./target-runner-growth"
+# Windows
+targetRunner = "./target-runner-growth.bat"
+
+maxExperiments = 5000
+
+parameterFile = "./parameters-growth.txt"
+
+digits = 2
+
+parallel = 4

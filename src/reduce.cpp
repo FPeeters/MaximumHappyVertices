@@ -2,7 +2,6 @@
 #include <ostream>
 #include <set>
 #include "reduce.h"
-#include "Graph.h"
 
 std::vector<unsigned int> findChain(Graph &graph, unsigned int node, unsigned int &anchor) {
     std::vector<unsigned int> chain;

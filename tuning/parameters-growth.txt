@@ -1,0 +1,1 @@
+alpha        "-alpha "         r  (-2, 2)

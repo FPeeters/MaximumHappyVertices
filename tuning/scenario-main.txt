@@ -1,9 +1,12 @@
 execDir = "../"
 
 trainInstancesDir = "../testInstances"
-trainInstancesFile = "./instances-list-main.txt"
+trainInstancesFile = "./instances-list.txt"
 
-targetRunner = "./target-runner-main"
+# Linux
+#targetRunner = "./target-runner-main"
+# Windows
+targetRunner = "./target-runner-main.bat"
 
 maxExperiments = 5000
 
