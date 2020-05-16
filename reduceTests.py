@@ -30,10 +30,8 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
         elif method == "cluster":
-            gen_result = subprocess.run(
-                [exe_dir + os.path.sep + "clusteringGenerator", filename, str(nbNodes), str(degree),
-                 str(alpha), str(nbColors), str(preColor), str(seed)])
-            gen_result.check_returncode()
+            filename = "clusterGraphs/graph" + str(nbNodes) + "_" + str(nbColors) + "_" + \
+                       str(preColor) + "_" + str(degree) + "_" + str(alpha) + "_" + str(seed) + ".txt"
             gen = [nbNodes, nbColors, preColor, seed, degree, alpha]
         else:
             gen_result = subprocess.run(
@@ -58,7 +56,8 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
         basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
         articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
 
-        os.remove(filename)
+        if method != "cluster":
+            os.remove(filename)
         return [method] + gen + [thiruv, basic, articul], time.time() - t
     except Exception as e:
         print(e)
@@ -94,9 +93,9 @@ if __name__ == '__main__':
 
     nbNodes_options = [1000]
     nbColor_options = [10, 50]
-    preColor_options = [0.05, 0.10, 0.15, 0.20, 0.25]
+    preColor_options = [0.05, 0.15, 0.25]
 
-    degree_options = range(0, 51)
+    degree_options = range(0, 26)
     alpha_options = [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
     scale_options = range(1, 26)
 
@@ -116,15 +115,16 @@ if __name__ == '__main__':
     for nbNodes in nbNodes_options:
         for nbColors in nbColor_options:
             for preColor in preColor_options:
+                if preColor * nbNodes < nbColors:
+                    count += 1
+                    print_progress(count, nbGraphs, avgTime)
+                    continue
+
                 for seed in seed_options:
                     for degree in degree_options:
-                        fileCount += 1
-                        if preColor * nbNodes < nbColors:
-                            writer.writerow([nbNodes, nbColors, nbNodes * preColor, seed])
-                            count += 1
-                            print_progress(count, nbGraphs, avgTime)
-                            continue
+                        degree = degree * 2
 
+                        fileCount += 1
                         filename = "todo/graph" + str(fileCount) + ".txt"
                         pool.apply_async(run_instance,
                                          (filename, "random", nbNodes, nbColors, preColor, degree, 0, seed),
@@ -132,11 +132,6 @@ if __name__ == '__main__':
 
                         for alpha in alpha_options:
                             fileCount += 1
-                            if preColor * nbNodes < nbColors:
-                                writer.writerow([nbNodes, nbColors, nbNodes * preColor, seed])
-                                count += 1
-                                print_progress(count, nbGraphs, avgTime)
-                                continue
 
                             filename = "todo/graph" + str(fileCount) + ".txt"
                             pool.apply_async(run_instance,
@@ -145,11 +140,6 @@ if __name__ == '__main__':
 
                     for scale in scale_options:
                         fileCount += 1
-                        if preColor * nbNodes < nbColors:
-                            writer.writerow([nbNodes, nbColors, nbNodes * preColor, seed])
-                            count += 1
-                            print_progress(count, nbGraphs, avgTime)
-                            continue
 
                         filename = "todo/graph" + str(fileCount) + ".txt"
                         pool.apply_async(run_instance,

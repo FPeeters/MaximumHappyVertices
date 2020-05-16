@@ -1,7 +1,7 @@
 import subprocess
 import os
 import time
-from multiprocessing import Pool, Lock, freeze_support
+from multiprocessing import Pool, Lock
 
 
 def generate(nbNodes, nbColors, preColor, degree, alpha, seed):
@@ -28,8 +28,8 @@ i = 1
 threads = 7
 lock = Lock()
 
-# exe_dir = "cmake-build-visual-studio"
-exe_dir = "cmake-build"
+exe_dir = "cmake-build-visual-studio"
+# exe_dir = "cmake-build"
 
 if __name__ == '__main__':
     nbNodes_options = [1000]
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 for seed in seed_options:
                     for degree in degree_options:
                         for alpha in alpha_options:
-                            pool.apply_async(generate, (nbNodes, nbColors, preColor, degree*2, alpha, seed),
+                            pool.apply_async(generate, (nbNodes, nbColors, preColor, degree * 2, alpha, seed),
                                              callback=callback)
 
     pool.close()
