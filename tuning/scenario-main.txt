@@ -1,7 +1,7 @@
 execDir = "../"
 
-trainInstancesDir = "../testInstances"
-trainInstancesFile = "./instances-list.txt"
+trainInstancesDir = "../tuningInstances"
+# trainInstancesFile = "./instances-list.txt"
 
 # Linux
 #targetRunner = "./target-runner-main"
