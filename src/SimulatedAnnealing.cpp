@@ -361,7 +361,7 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
         temperature = coolTemperature(config, i, clocks);
 
         if (config.outputProgress)
-            f << energy << std::endl;
+            f << i << "\t" << temperature << "\t" << energy << "\t" << currBestEnergy << std::endl;
 
         ++i;
         clocks = clock() - startClock;
