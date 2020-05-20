@@ -16,7 +16,7 @@
 
 :: Please change the EXE and FIXED_PARAMS to the correct ones
 SET "exe=cmake-build-visual-studio\main.exe"
-SET "fixed_params=-minimize -a simAnn -maxI 100000 -red articul"
+SET "fixed_params=-minimize -a simAnn -maxI 5000 -red articul -zeroTemp 0.05"
 
 FOR /f "tokens=1-4*" %%a IN ("%*") DO (
 	SET candidate=%%a

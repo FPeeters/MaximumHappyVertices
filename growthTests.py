@@ -2,6 +2,8 @@ import subprocess
 import csv
 import os
 import time
+import numpy as np
+import random
 from multiprocessing import Pool, Lock
 
 
@@ -42,23 +44,32 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
 
-        thiruv_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "thiruvady",
-                                        "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-        thiruv_result.check_returncode()
-        basic_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "basic",
-                                       "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-        basic_result.check_returncode()
-        articul_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-red", "articul",
-                                         "-a", "greedy"], stdout=subprocess.PIPE, universal_newlines=True)
-        articul_result.check_returncode()
+        stats = []
 
-        thiruv = str(sum(map(lambda x: int(x.split(" ")[0]), thiruv_result.stdout.split("\n")[1:4])))
-        basic = str(sum(map(lambda x: int(x.split(" ")[0]), basic_result.stdout.split("\n")[1:5])))
-        articul = str(sum(map(lambda x: int(x.split(" ")[0]), articul_result.stdout.split("\n")[2:6])))
+        for alpha in [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]:
+            happy = np.ndarray((SAMPLES,))
+            for i in range(SAMPLES):
+                result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+                                         "-red", "none", "-selectRandom", "-alpha", str(alpha),
+                                         "-r", str(random.randint(0, 2 ** 8))],
+                                        stdout=subprocess.PIPE, universal_newlines=True)
+                happy[i] = int(result.stdout.split("\n")[-1])
+                if alpha == -2. or alpha == 2.:
+                    break
+            if alpha == -2. or alpha == 2.:
+                stats += [str(happy[0]), "0.0", str(happy[0])]
+            else:
+                stats += [str(np.average(happy)), str(np.std(happy)), str(np.max(happy))]
+
+        result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+                                 "-red", "none"],
+                                stdout=subprocess.PIPE, universal_newlines=True)
+
+        lewis = int(result.stdout.split("\n")[-1])
 
         if method != "cluster":
             os.remove(filename)
-        return [method] + gen + [thiruv, basic, articul], time.time() - t
+        return [method] + gen + [lewis] + stats, time.time() - t
     except Exception as e:
         print(filename, e)
         return [], time.time() - t
@@ -83,6 +94,7 @@ emaFactor = 0
 
 threads = 6
 lock = Lock()
+SAMPLES = 50
 
 exe_dir = "cmake-build-visual-studio"
 # exe_dir = "cmake-build"
@@ -130,7 +142,6 @@ if __name__ == '__main__':
 
                         for alpha in alpha_options:
                             fileCount += 1
-
                             filename = "todo/graph" + str(fileCount) + ".txt"
                             pool.apply_async(run_instance,
                                              (filename, "cluster", nbNodes, nbColors, preColor, degree, alpha, seed),
@@ -138,7 +149,6 @@ if __name__ == '__main__':
 
                     for scale in scale_options:
                         fileCount += 1
-
                         filename = "todo/graph" + str(fileCount) + ".txt"
                         pool.apply_async(run_instance,
                                          (filename, "scale", nbNodes, nbColors, preColor, scale, 0, seed),

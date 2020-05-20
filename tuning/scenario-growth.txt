@@ -1,7 +1,6 @@
 execDir = "../"
 
 trainInstancesDir = "../tuningInstances"
-# trainInstancesFile = "./instances-list.txt"
 
 # Linux
 #targetRunner = "./target-runner-growth"

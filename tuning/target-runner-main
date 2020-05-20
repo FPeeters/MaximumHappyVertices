@@ -22,7 +22,7 @@ error() {
 }
 
 EXE=cmake-build/main
-FIXED_PARAMS="-minimize -a simAnn -maxI 5000 -red articul"
+FIXED_PARAMS="-minimize -a simAnn -maxI 5000 -red articul -zeroTemp 0.05"
 
 CONFIG_ID=$1
 INSTANCE_ID=$2
