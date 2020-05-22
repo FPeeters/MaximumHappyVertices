@@ -49,7 +49,7 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
         for alpha in [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]:
             happy = np.ndarray((SAMPLES,))
             for i in range(SAMPLES):
-                result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+                result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "growth",
                                          "-red", "none", "-selectRandom", "-alpha", str(alpha),
                                          "-r", str(random.randint(0, 2 ** 8))],
                                         stdout=subprocess.PIPE, universal_newlines=True)
@@ -61,7 +61,7 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             else:
                 stats += [str(np.average(happy)), str(np.std(happy)), str(np.max(happy))]
 
-        result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+        result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "growth",
                                  "-red", "none"],
                                 stdout=subprocess.PIPE, universal_newlines=True)
 
@@ -92,12 +92,12 @@ count = 0
 avgTime = -1
 emaFactor = 0
 
-threads = 6
+threads = 4
 lock = Lock()
-SAMPLES = 50
+SAMPLES = 20
 
-exe_dir = "cmake-build-visual-studio"
-# exe_dir = "cmake-build"
+# exe_dir = "cmake-build-visual-studio"
+exe_dir = "cmake-build"
 
 if __name__ == '__main__':
     file = open("results.txt", "w", newline="")
