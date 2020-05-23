@@ -42,12 +42,12 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
 
-        greedy_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "greedy",
+        greedy_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "greedy",
                                         "-red", "articul"], stdout=subprocess.PIPE, universal_newlines=True)
         greedy_result.check_returncode()
         greedy = greedy_result.stdout.split("\n")[-1]
 
-        growth_result = subprocess.run(["cmake-build-visual-studio\\main.exe", filename, "-a", "growth",
+        growth_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "growth",
                                         "-red", "articul"], stdout=subprocess.PIPE, universal_newlines=True)
         growth_result.check_returncode()
         growth = growth_result.stdout.split("\n")[-1]
@@ -88,12 +88,11 @@ count = 0
 avgTime = -1
 emaFactor = 0
 
-threads = 4
+threads = 7
 lock = Lock()
-SAMPLES = 20
 
-exe_dir = "cmake-build-visual-studio"
-# exe_dir = "cmake-build"
+# exe_dir = "cmake-build-visual-studio"
+exe_dir = "cmake-build"
 
 if __name__ == '__main__':
     file = open("results.txt", "w", newline="")
@@ -103,16 +102,16 @@ if __name__ == '__main__':
     nbColor_options = [10, 50]
     preColor_options = [0.05, 0.15, 0.25]
 
-    degree_options = [5] #range(1, 26)
-    alpha_options = [0] #[-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
+    degree_options = range(1, 26)
+    alpha_options = [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
     scale_options = range(1, 13)
 
-    seed_options = [591] #, 8412, 2107, 959, 3521, 9125, 2276, 2568, 2543, 29, 7131, 564, 2502, 4295, 5309, 2750, 319,
-                    #7074, 2605, 9193]
+    seed_options = [591, 8412, 2107, 959, 3521, 9125, 2276, 2568, 2543, 29, 7131, 564, 2502, 4295, 5309, 2750, 319,
+                    7074, 2605, 9193]
 
     nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * (
             len(degree_options) * (1 + len(alpha_options)) + len(scale_options)) * len(seed_options)
-    emaFactor = 2 / (nbGraphs / len(nbNodes_options) + 1)
+    emaFactor = 2 / (nbGraphs / len(nbNodes_options) / len(seed_options) + 1)
 
     print("Total graphs:", nbGraphs)
     print_progress(0, nbGraphs)
