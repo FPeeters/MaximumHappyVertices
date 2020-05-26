@@ -91,8 +91,8 @@ emaFactor = 0
 threads = 7
 lock = Lock()
 
-# exe_dir = "cmake-build-visual-studio"
-exe_dir = "cmake-build"
+exe_dir = "cmake-build-visual-studio"
+# exe_dir = "cmake-build"
 
 if __name__ == '__main__':
     file = open("results.txt", "w", newline="")

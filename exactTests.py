@@ -96,13 +96,12 @@ if __name__ == '__main__':
     degree_options = range(1, 26)
     alpha_options = [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
     scale_options = range(1, 13)
-    # 591, 8412, 2107, 959, 3521
-    seed_options = [9125, 2276, 2568, 2543, 29] #, 7131, 564, 2502, 4295, 5309, 2750, 319,
-                    #7074, 2605, 9193]
+    # 591, 8412, 2107, 959, 3521, 9125, 2276, 2568, 2543, 29, 7131, 564, 2502, 4295, 5309
+    seed_options = [2750, 319, 7074, 2605, 9193]
 
     nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * (
             len(degree_options) * (1 + len(alpha_options)) + len(scale_options)) * len(seed_options)
-    emaFactor = 2 / (nbGraphs / len(nbNodes_options) + 1)
+    emaFactor = 2 / (nbGraphs / len(nbNodes_options) / len(seed_options) + 1)
 
     print("Total graphs:", nbGraphs)
     print_progress(0, nbGraphs)

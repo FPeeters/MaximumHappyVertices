@@ -1,43 +1,41 @@
 import matplotlib.pyplot as plt
-import math
+import pandas as pd
 
-file = open("reduceResults.txt", "r")
-results = [list(map(lambda x: float(x) if x != "\n" else 0., line.split(','))) for line in file.readlines() if
-           len(line.split(',')) != 4]
-file.close()
+data = pd.read_csv("reduceResultsFinal.txt", header=None,
+                   names=["method", "n", "nbColors", "precolor", "seed", "Gemiddelde graad", "alpha", "thiruvady", "basic",
+                          "articul"])
 
-nbBuckets = 100
+data["Eenvoudig"] = data.diff(axis=1)["basic"]
+data["Articulatie"] = data.diff(axis=1, periods=2)["articul"]
 
-results = [y for y in results if y[5] < 100 / (y[0] - 1.)]
+random = data["method"] == "random"
+scale = data["method"] == "scale"
+cluster = data["method"] == "cluster"
 
-for precolor in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
-    x = [y[5] * (y[0] - 1.) for y in results if y[2] == precolor and y[1] == 5]
-    thiriv_reduce = [y[6] for y in results if y[2] == precolor and y[1] == 5]
-    basic_reduce = [y[7] for y in results if y[2] == precolor and y[1] == 5]
-    articul_reduce = [y[8] for y in results if y[2] == precolor and y[1] == 5]
+print("Diff ifv methode, nbColors")
+print(data.groupby(["method", "nbColors"]).mean().loc[:, ["Eenvoudig", "Articulatie"]])
+print("\nDiff ifv graad voor scale")
+print(data[scale].groupby("Gemiddelde graad").mean().loc[:, ["Eenvoudig", "Articulatie"]])
+print("\nDiff ifv alpha voor cluster")
+print(data[cluster].groupby("alpha").mean().loc[:, ["Eenvoudig", "Articulatie"]])
+print("\nDiff ifv methode, precolor")
+print(data.groupby(["method", "precolor"]).mean().loc[:, ["Eenvoudig", "Articulatie"]])
+print("\nArticul diff ifv graad voor cluster -2")
+print(data[data["alpha"] == -2.].groupby("Gemiddelde graad").mean()["Articulatie"])
 
-    buckets = [[0., 0., 0., 0] for _ in range(nbBuckets)]
-    for j in range(len(x)):
-        index = math.floor((x[j] - min(x))/max(x)*nbBuckets)
-        if index == nbBuckets:
-            buckets[-1][0] += thiriv_reduce[j]
-            buckets[-1][1] += basic_reduce[j]
-            buckets[-1][2] += articul_reduce[j]
-            buckets[-1][3] += 1
-        else:
-            buckets[index][0] += thiriv_reduce[j]
-            buckets[index][1] += basic_reduce[j]
-            buckets[index][2] += articul_reduce[j]
-            buckets[index][3] += 1
-    indices = [min(x) + i * (max(x) - min(x)) / nbBuckets for i in range(nbBuckets)]
-    buckets = [[y[0] / y[3], y[1] / y[3], y[2] / y[3]] if y[3] != 0 else 0 for y in buckets]
+data["avgDegreeCut"] = pd.cut(data["Gemiddelde graad"], 25, include_lowest=True)
 
-    plt.figure()
-    plt.plot(indices, buckets)
+data[random].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["Eenvoudig", "Articulatie"])
+plt.savefig("plots/reductie_random.png")
 
-    plt.title("Precolor= " + str(precolor))
-    plt.legend(["Thiruvady", "Basic", "Articulation"])
-    plt.ylabel("Nb of nodes reduced")
-    plt.xlabel("Average degree")
-    plt.savefig("plots/reduce_" + str(precolor*2) + ".png")
-    plt.close()
+data[cluster].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["Eenvoudig", "Articulatie"])
+plt.savefig("plots/reductie_cluster.png")
+
+plt.figure()
+ax = plt.gca()
+
+data[random].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y="articul", label="Random", ax=ax)
+data[cluster].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y="articul", label="Lineair", ax=ax)
+scale_mean = data[scale].groupby("avgDegreeCut").mean()
+scale_mean[scale_mean["articul"].notnull()].plot(x="Gemiddelde graad", y="articul", label="Scale-free", ax=ax)
+plt.savefig("plots/reductie_articul.png")
