@@ -16,8 +16,18 @@ void initRandomColoring(Graph &graph, Rng &rng) {
     }
 }
 
-std::vector<Group> generateGroups(const Graph &graph) {
-    std::vector<Group> groups;
+struct colored_group {
+    unsigned int color;
+    std::vector<unsigned int> nodes;
+    std::set<unsigned int, std::greater<>> adjColors;
+
+    explicit colored_group(unsigned int color, unsigned int node) : color(color), nodes(), adjColors() {
+        nodes.push_back(node);
+    }
+};
+
+std::vector<colored_group> generateGroups(const Graph &graph) {
+    std::vector<colored_group> groups;
     int *group = (int *) calloc(sizeof(int), graph.getNbNodes());
     int groupCounter = 0;
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
@@ -28,7 +38,7 @@ std::vector<Group> generateGroups(const Graph &graph) {
         if (group[node] != 0)
             continue;
 
-        Group newGroup(graph.getColor(node), node);
+        colored_group newGroup(graph.getColor(node), node);
         group[node] = ++groupCounter;
         std::queue<unsigned int> toCheck;
         toCheck.push(node);
@@ -58,7 +68,7 @@ std::vector<Group> generateGroups(const Graph &graph) {
     return groups;
 }
 
-void splitGroup(Graph &graph, Group &group, Rng &rng, unsigned int &colorChanges) {
+void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colorChanges) {
     std::vector<unsigned int> candidates;
 
     for (auto node: group.nodes) {
@@ -251,7 +261,7 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
     }
 }
 
-void mergeGroup(Graph &graph, Group &group, Rng &rng, unsigned int &colorChanges) {
+void mergeGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colorChanges) {
     std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
     unsigned int nbColor = colorDistr(rng);
     auto it = group.adjColors.begin();
@@ -270,21 +280,21 @@ Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config, unsi
     const double val = splitDistr(rng);
 
     if (val < config.splitGroupPerc) {
-        const std::vector<Group> groups = generateGroups(graph);
+        const std::vector<colored_group> groups = generateGroups(graph);
         if (groups.size() <= 1)
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
-        Group group = groups[groupDistr(rng)];
+        colored_group group = groups[groupDistr(rng)];
         splitGroup(newGraph, group, rng, colorChanges);
     } else if (val < config.splitGroupPerc + config.swapDegreePerc) {
         swapDegreeBased(newGraph, rng);
         colorChanges += 1;
     } else {
-        const std::vector<Group> groups = generateGroups(graph);
+        const std::vector<colored_group> groups = generateGroups(graph);
         if (groups.size() <= 1)
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
-        Group group = groups[groupDistr(rng)];
+        colored_group group = groups[groupDistr(rng)];
         mergeGroup(newGraph, group, rng, colorChanges);
     }
 
@@ -304,7 +314,8 @@ double coolTemperature(const config &config, const unsigned int iteration, const
         if (clock > (1 - config.zeroIterations) * config.timeLimit * CLOCKS_PER_SEC)
             return 0;
         else
-            return config.initTemp - config.initTemp / (config.timeLimit * CLOCKS_PER_SEC * (1 - config.zeroIterations)) * clock;
+            return config.initTemp -
+                   config.initTemp / (config.timeLimit * CLOCKS_PER_SEC * (1 - config.zeroIterations)) * clock;
     else if (iteration > (1 - config.zeroIterations) * config.maxIterations)
         return 0;
     else

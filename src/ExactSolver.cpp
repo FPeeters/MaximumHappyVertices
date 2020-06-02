@@ -42,7 +42,7 @@ unsigned int solveExactDefault(Graph &graph, const config &config) {
     cplex.setParam(IloCplex::Param::Threads, config.threads);
     cplex.solve();
 
-    std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl << std::endl;
+    std::cout << std::endl << "Status of the found solution: " << cplex.getStatus() << std::endl;
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (!graph.isPreColored(node))
@@ -136,7 +136,6 @@ unsigned int solveExact(Graph &graph, const config &config) {
     else
         return solveExactDefault(graph, config);
 #else
-    std::cout << "Exact solver was not loaded during compiling" << std::endl;
-    return 0;
+    throw std::runtime_error("Exact solver was not loaded during compiling");
 #endif // CPLEX_FOUND
 }

@@ -1,5 +1,6 @@
 #include <fstream>
 #include <cstring>
+#include <iostream>
 #include "Graph.h"
 
 using namespace std;
@@ -103,10 +104,23 @@ unsigned int Graph::getHappyVertices() const {
 void Graph::writeToDot(const std::string &filename) const {
     ofstream out;
     out.open(filename + ".dot");
-    if (out.fail()) throw runtime_error("Failed to open file");
+
+    if (out.fail()) {
+        cout << "Failed to open .dot file." << endl;
+        return;
+    }
+
     out << "graph {" << endl;
     out << "graph [overlap=false]" << endl;
     out << "node [style=filled,width=0.05,label=\"\",colorscheme=svg,fixedsize=true]" << endl;
+
+    if (nbColors > 10) {
+        cout << "Only graphs with up to 10 different colors are supported." << endl;
+        return;
+    }
+
+    static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia",
+                                        "cornflowerblue", "aqua", "peachpuff"};
 
     for (unsigned int node = 0; node < nbNodes; ++node) {
         if (isPreColored(node))
@@ -115,7 +129,6 @@ void Graph::writeToDot(const std::string &filename) const {
             out << "\tn" << node << " [shape=circle,color=" << COLORS[getColor(node)];
         if (!isHappy(node))
             out << ",label=U";
-//        out << ",label=" << node;
         out << "]" << endl;
     }
 
@@ -144,7 +157,11 @@ void Graph::writeToDot(const std::string &filename) const {
 void Graph::writeToFile(const std::string &filename) const {
     ofstream out;
     out.open(filename);
-    if (out.fail()) throw runtime_error("Failed to open file");
+
+    if (out.fail()) {
+        cout << "Failed to open output file." << endl;
+        return;
+    }
 
     for (unsigned int node = 0; node < nbNodes; ++node) {
         out << node << "\t|\t";

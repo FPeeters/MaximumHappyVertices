@@ -3,7 +3,6 @@
 #include "ConstructiveAlgs.h"
 #include "SimulatedAnnealing.h"
 #include "ExactSolver.h"
-#include "config.h"
 #include "reduce.h"
 
 
@@ -14,7 +13,7 @@ int main(int argc, char **argv) {
 
     try {
         Graph graph(config.inputFilename);
-        ReducedGraph reduced(graph, config);
+        reduced_graph reduced(graph, config);
         reduced.writeStats(std::cout);
 
         unsigned int happy = 0;
@@ -23,7 +22,7 @@ int main(int argc, char **argv) {
             std::cout << "No nodes left after reducing" << std::endl;
             happy = 0;
         } else {
-            switch (config.algorithm) {
+            switch (config.algo) {
                 case config::GREEDY:
                     std::cout << "Executing greedy search" << std::endl;
                     happy = greedyMHV(reduced.reducedGraph);
@@ -48,7 +47,6 @@ int main(int argc, char **argv) {
         }
 
         happy += reduced.colorOriginal();
-//        std::cout << graph.getHappyVertices() << std::endl;
 
         if (config.outputPngFilename != nullptr)
             graph.writeToDot(config.outputPngFilename);
@@ -56,6 +54,7 @@ int main(int argc, char **argv) {
         if (config.outputFilename != nullptr)
             graph.writeToFile(config.outputFilename);
 
+        std::cout << std::endl;
         if (config.minimize)
             std::cout << graph.getNbNodes() - happy;
         else

@@ -7,7 +7,7 @@ include(FindPackageHandleStandardArgs)
 
 # Find the path to CPLEX Studio.
 # Add the installation folder of IBM ILOG here if available
-set(CPLEX_ILOG_DIRS  "D:/Programs/IBM/ILOG" "C:/Program Files/IBM/ILOG")
+set(CPLEX_ILOG_DIRS "D:/Programs/IBM/ILOG" "C:/Program Files/IBM/ILOG")
 set(CPLEX_ARCH x64)
 
 if (NOT CPLEX_STUDIO_DIR)
@@ -232,7 +232,7 @@ add_executable(main src/main.cpp src/Graph.cpp src/Graph.h src/ConstructiveAlgs.
 if (CPLEX_FOUND)
     target_link_libraries(main ilocplex)
     target_compile_definitions(main PUBLIC CPLEX_FOUND)
-endif()
+endif ()
 
 add_executable(distribution_test src/distribution_test.cpp src/linear_int_distribution.h)
 
@@ -240,4 +240,4 @@ add_executable(generator generator/gen.cpp)
 
 add_executable(happyTabu happytabu/main.cpp happytabu/main.h happytabu/addprecolourings.cpp happytabu/addprecolourings.h happytabu/bounds.cpp happytabu/bounds.h happytabu/graph.cpp happytabu/graph.h happytabu/initsol.cpp happytabu/initsol.h happytabu/IO.cpp happytabu/IO.h happytabu/tabu.cpp happytabu/tabu.h)
 
-add_executable(clusteringGenerator src/clusteringGenerator.cpp src/linear_int_distribution.h)
+add_executable(linearGen src/linearDistributionGenerator.cpp src/linear_int_distribution.h)

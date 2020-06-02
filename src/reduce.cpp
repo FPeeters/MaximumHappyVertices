@@ -29,6 +29,12 @@ std::vector<unsigned int> findChain(Graph &graph, unsigned int node, unsigned in
     return chain;
 }
 
+enum status {
+    U,
+    L_U,
+    Other
+};
+
 status getStatus(const Graph &graph, unsigned int node) {
     if (graph.isPreColored(node)) {
         for (unsigned int adj: graph.getEdges(node)) {
@@ -51,7 +57,7 @@ status getStatus(const Graph &graph, unsigned int node) {
 }
 
 
-bool onlyConnectedToUnhappy(const Graph &graph, unsigned int node, const status* statuses) {
+bool onlyConnectedToUnhappy(const Graph &graph, unsigned int node, const status *statuses) {
     for (unsigned int adj: graph.getEdges(node)) {
         if (statuses[adj] == Other)
             return false;
@@ -148,7 +154,7 @@ std::vector<unsigned int> buildReducedGraph(Graph &original, Graph &reduced, uns
 }
 
 
-void ReducedGraph::thiruvadyReduction() {
+void reduced_graph::thiruvadyReduction() {
     auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
     auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
     std::fill_n(replacements, originalGraph.getNbNodes(), -2);
@@ -188,7 +194,7 @@ void ReducedGraph::thiruvadyReduction() {
     free(replacements);
 }
 
-void ReducedGraph::basicReduction() {
+void reduced_graph::basicReduction() {
     auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * originalGraph.getNbNodes());
     auto *statuses = (status *) malloc(sizeof(status) * originalGraph.getNbNodes());
     std::fill_n(replacements, originalGraph.getNbNodes(), -2);
@@ -249,7 +255,7 @@ void ReducedGraph::basicReduction() {
 
 struct component {
     std::vector<unsigned int> nodes;
-    unsigned int reference = -1;
+    unsigned int reference = unsigned(-1);
     unsigned int nbPrecolors = 0;
     unsigned int nbAdj = 0;
 };
@@ -286,7 +292,7 @@ component findComponent(const Graph &graph, unsigned int node, bool *visited, co
     return comp;
 }
 
-void ReducedGraph::articulationReduction() {
+void reduced_graph::articulationReduction() {
     bool changesMade = true;
     Graph currentGraph = originalGraph;
 
@@ -320,7 +326,7 @@ void ReducedGraph::articulationReduction() {
             if (visited[node] || articulation[node] || currentGraph.isPreColored(node))
                 continue;
             component comp = findComponent(currentGraph, node, visited, articulation);
-            
+
             if (comp.nbAdj == 0 && comp.nbPrecolors == 0) {
                 changesMade = true;
                 stats.freeArticulation += comp.nodes.size();
@@ -401,9 +407,9 @@ void ReducedGraph::articulationReduction() {
 }
 
 
-ReducedGraph::ReducedGraph(Graph &original, const config &config) : originalGraph(original),
-                                                                    reducedGraph(original.getNbColors()),
-                                                                    mode(config.reduct) {
+reduced_graph::reduced_graph(Graph &original, const config &config) : originalGraph(original),
+                                                                      reducedGraph(original.getNbColors()),
+                                                                      mode(config.reduct) {
     switch (mode) {
         case config::NONE:
             reducedGraph = original;
@@ -421,7 +427,7 @@ ReducedGraph::ReducedGraph(Graph &original, const config &config) : originalGrap
     }
 }
 
-unsigned int ReducedGraph::colorOriginal() {
+unsigned int reduced_graph::colorOriginal() {
     switch (mode) {
         case config::NONE:
             return 0;
@@ -478,7 +484,7 @@ unsigned int ReducedGraph::colorOriginal() {
     return 0;
 }
 
-void ReducedGraph::writeStats(std::ostream &out) {
+void reduced_graph::writeStats(std::ostream &out) {
 
     switch (mode) {
         case config::NONE:

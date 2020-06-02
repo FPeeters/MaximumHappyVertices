@@ -13,11 +13,10 @@ public:
         SIMULATED_ANNEALING,
         EXACT
     };
-    algorithm algorithm = EXACT;
+    algorithm algo = EXACT;
     int seed = 123;
     bool minimize = false;
 
-    // Reduction options
     enum reduction {
         NONE,
         THIRUVADY,

@@ -8,9 +8,9 @@ class linear_int_distribution {
 
 public:
     explicit linear_int_distribution(double alpha = 0, IntType min = 0, IntType max = 1) : alpha(alpha),
-                                                                                        min(min),
-                                                                                        max(max) {
-        std::uniform_int_distribution<IntType> typeCheck(0,1);
+                                                                                           min(min),
+                                                                                           max(max) {
+        std::uniform_int_distribution<IntType> typeCheck(0, 1);
         if (alpha > 2)
             this->alpha = 2;
         else if (alpha < -2)
@@ -19,7 +19,7 @@ public:
     }
 
     template<class Engine>
-    IntType operator()(Engine& engine);
+    IntType operator()(Engine &engine);
 
 private:
     double alpha;

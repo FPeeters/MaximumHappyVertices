@@ -124,7 +124,8 @@ int main(int argc, char **argv) {
     out.open(filename);
 
     out << "c This graph was made by the clusteringGenerator of F. Peeters" << std::endl;
-    out << "c Using these settings: " << nbNodes << " " << avgDegree << " " << alpha << " " << nbColors << " " << precolor << " " << seed << std::endl;
+    out << "c Using these settings: " << nbNodes << " " << avgDegree << " " << alpha << " " << nbColors
+        << " " << precolor << " " << seed << std::endl;
     out << "p edge " << nbNodes << " " << nbEdges << " " << nbColors << std::endl;
 
     for (const adjacency_item &item: adjacency) {
@@ -139,4 +140,6 @@ int main(int argc, char **argv) {
             out << "n " << item.index << " " << item.color << std::endl;
     }
     out.close();
+    
+    std::cout << "Graph successfully created." << std::endl;
 }

@@ -31,8 +31,8 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             gen_result.check_returncode()
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
-        elif method == "cluster":
-            filename = "../clusterGraphs/graph" + str(nbNodes) + "_" + str(nbColors) + "_" + \
+        elif method == "linear":
+            filename = "../linearGraphs/graph" + str(nbNodes) + "_" + str(nbColors) + "_" + \
                        str(preColor) + "_" + str(degree) + "_" + str(alpha) + "_" + str(seed) + ".txt"
             gen = [nbNodes, nbColors, preColor, seed, degree, alpha]
         else:
@@ -67,7 +67,7 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
 
         lewis = int(result.stdout.split("\n")[-1])
 
-        if method != "cluster":
+        if method != "linear":
             os.remove(filename)
         return [method] + gen + [lewis] + stats, time.time() - t
     except Exception as e:
@@ -144,7 +144,7 @@ if __name__ == '__main__':
                             fileCount += 1
                             filename = "../todo/graph" + str(fileCount) + ".txt"
                             pool.apply_async(run_instance,
-                                             (filename, "cluster", nbNodes, nbColors, preColor, degree, alpha, seed),
+                                             (filename, "linear", nbNodes, nbColors, preColor, degree, alpha, seed),
                                              callback=callback)
 
                     for scale in scale_options:

@@ -28,9 +28,9 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
             gen_result.check_returncode()
             gen = gen_result.stdout.split("\t")
             gen = [gen[1], gen[2], float(gen[3]) / nbNodes, gen[7], float(gen[6]) * (nbNodes - 1), alpha]
-        elif method == "cluster":
+        elif method == "linear":
             gen_result = subprocess.run(
-                [exe_dir + os.path.sep + "../clusteringGenerator", filename, str(nbNodes), str(degree), str(alpha),
+                [exe_dir + os.path.sep + "linearGen", filename, str(nbNodes), str(degree), str(alpha),
                  str(nbColors), str(preColor), str(seed)],
                 stdout=subprocess.PIPE, universal_newlines=True)
             gen_result.check_returncode()
@@ -126,7 +126,7 @@ if __name__ == '__main__':
                         for alpha in alpha_options:
                             fileCount += 1
                             filename = "../todo/graph" + str(fileCount) + ".txt"
-                            res = run_instance(filename, "cluster", nbNodes, nbColors, preColor, degree, alpha, seed)
+                            res = run_instance(filename, "linear", nbNodes, nbColors, preColor, degree, alpha, seed)
                             callback(res)
 
                     for scale in scale_options:

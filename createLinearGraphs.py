@@ -8,7 +8,7 @@ def generate(nbNodes, nbColors, preColor, degree, alpha, seed):
     t = time.time()
     filename = "clusterGraphs/graph" + str(nbNodes) + "_" + str(nbColors) + "_" + \
                str(preColor) + "_" + str(degree) + "_" + str(alpha) + "_" + str(seed) + ".txt"
-    gen_result = subprocess.run([exe_dir + os.path.sep + "clusteringGenerator", filename,
+    gen_result = subprocess.run([exe_dir + os.path.sep + "linearGen", filename,
                                  str(nbNodes), str(degree), str(alpha), str(nbColors),
                                  str(preColor), str(seed)])
     if gen_result.returncode != 0:

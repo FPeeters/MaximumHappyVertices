@@ -5,28 +5,22 @@
 #include "Graph.h"
 #include "config.h"
 
-struct ReduceStats {
-    unsigned int unconnectedComponent = 0;
-    unsigned int singleColorComponent = 0;
-    unsigned int unhappyConnections = 0;
-    unsigned int singleLinkChains = 0;
-
-    unsigned int freeArticulation = 0;
-    unsigned int singleArticulation = 0;
-    unsigned int nbIterations = 0;
-};
-
-enum status {
-    U,
-    L_U,
-    Other
-};
-
-class ReducedGraph {
+class reduced_graph {
 private:
+    struct reduce_stats {
+        unsigned int unconnectedComponent = 0;
+        unsigned int singleColorComponent = 0;
+        unsigned int unhappyConnections = 0;
+        unsigned int singleLinkChains = 0;
+
+        unsigned int freeArticulation = 0;
+        unsigned int singleArticulation = 0;
+        unsigned int nbIterations = 0;
+    };
+
     std::vector<std::vector<unsigned int>> firstReferences;
     std::vector<unsigned int> secondReferences;
-    ReduceStats stats;
+    reduce_stats stats;
     config::reduction mode;
 
     void thiruvadyReduction();
@@ -40,7 +34,7 @@ public:
     Graph &originalGraph;
     Graph reducedGraph;
 
-    explicit ReducedGraph(Graph &original, const config &config);
+    explicit reduced_graph(Graph &original, const config &config);
 
     unsigned int colorOriginal();
 

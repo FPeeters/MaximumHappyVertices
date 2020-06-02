@@ -1,3 +1,5 @@
+#include "config.h"
+#include "Graph.h"
 #include <random>
 #include <queue>
 #include "ConstructiveAlgs.h"
@@ -26,6 +28,17 @@ unsigned int greedyMHV(Graph &graph) {
     colorAll(graph, bestColor);
     return bestHappy;
 }
+
+enum node_status {
+    None,
+    Happy,
+    PotentiallyHappy,
+    Unhappy,
+    Lp,
+    Lh,
+    Lu,
+    Lf
+};
 
 node_status determineColoredStatus(const Graph &graph, const unsigned int node,
                                    const std::vector<node_status> &labels, unsigned int &nbHappy) {
@@ -207,7 +220,6 @@ void updateAdj(Graph &graph, unsigned int node, std::vector<node_status> &labels
     }
 }
 
-
 unsigned int growthMHV(Graph &graph, const config &config) {
     Rng rng(config.seed);
 
@@ -283,18 +295,18 @@ unsigned int growthMHV(Graph &graph, const config &config) {
     return graph.getHappyVertices();
 }
 
-struct LeftRightGroup {
+struct left_right_group {
     std::vector<unsigned int> nodes;
     unsigned int left;
     unsigned int right;
 
-    LeftRightGroup() : left(-1), right(-1) {};
+    left_right_group() : left(-1), right(-1) {};
 };
 
-std::vector<LeftRightGroup> makeGroups(const Graph &graph) {
+std::vector<left_right_group> makeGroups(const Graph &graph) {
     bool *done = (bool *) calloc(graph.getNbNodes(), sizeof(bool));
 
-    std::vector<LeftRightGroup> groups;
+    std::vector<left_right_group> groups;
 
     for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
         if (done[node])
@@ -304,7 +316,7 @@ std::vector<LeftRightGroup> makeGroups(const Graph &graph) {
             continue;
         }
 
-        LeftRightGroup newGroup;
+        left_right_group newGroup;
         std::queue<unsigned int> todo;
         todo.push(node);
         bool leftSet = false;
@@ -341,21 +353,21 @@ std::vector<LeftRightGroup> makeGroups(const Graph &graph) {
     return groups;
 }
 
-void colorGroup(Graph &graph, const LeftRightGroup &group, const unsigned int color) {
+void colorGroup(Graph &graph, const left_right_group &group, const unsigned int color) {
     for (unsigned int node: group.nodes)
         graph.color(node, color);
 }
 
 unsigned int twoRegular(Graph &graph) {
-    std::vector<LeftRightGroup> groups = makeGroups(graph);
+    std::vector<left_right_group> groups = makeGroups(graph);
 
-    std::queue<LeftRightGroup, std::deque<LeftRightGroup>> queue(
-            (std::deque<LeftRightGroup>(groups.begin(), groups.end())));
+    std::queue<left_right_group, std::deque<left_right_group>> queue(
+            std::deque<left_right_group>(groups.begin(), groups.end()));
 
     unsigned int lastChange = -1;
 
     while (!queue.empty()) {
-        LeftRightGroup group = queue.front();
+        left_right_group group = queue.front();
         queue.pop();
 
         if (group.left == -1 && group.right == -1) { // Isolated group with no constraints, any color will do

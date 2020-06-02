@@ -58,15 +58,15 @@ config::config(int argc, char **argv) {
             if (strcmp("-a", argv[i]) == 0) {
                 ++i;
                 if (strcmp("greedy", argv[i]) == 0)
-                    algorithm = GREEDY;
+                    algo = GREEDY;
                 else if (strcmp("growth", argv[i]) == 0)
-                    algorithm = GROWTH;
+                    algo = GROWTH;
                 else if (strcmp("2reg", argv[i]) == 0)
-                    algorithm = TWO_REGULAR;
+                    algo = TWO_REGULAR;
                 else if (strcmp("simAnn", argv[i]) == 0)
-                    algorithm = SIMULATED_ANNEALING;
+                    algo = SIMULATED_ANNEALING;
                 else if (strcmp("exact", argv[i]) == 0)
-                    algorithm = EXACT;
+                    algo = EXACT;
             } else if (strcmp("-r", argv[i]) == 0)
                 seed = (int) strtol(argv[++i], nullptr, 10);
             else if (strcmp("-time", argv[i]) == 0)
@@ -129,7 +129,7 @@ config::config(int argc, char **argv) {
             return;
         }
 
-        if (algorithm == SIMULATED_ANNEALING) {
+        if (algo == SIMULATED_ANNEALING) {
             if (!(timeLimit != -1 && maxIterations == -1) && !(timeLimit == -1 && maxIterations != -1)) {
                 cout << "For simulated annealing either a time limit or a maximum amout of iterations has to be set" << endl;
                 return;

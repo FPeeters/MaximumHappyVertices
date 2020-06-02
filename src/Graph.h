@@ -6,68 +6,67 @@
 #include <string>
 #include <stdexcept>
 
-static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia",
-                                    "cornflowerblue", "aqua", "peachpuff"};
+#if __has_cpp_attribute(nodiscard)
+#define NODISCARD [[nodiscard]]
+#elif __has_cpp_attribute(gnu::warn_unused_result)
+#define NODISCARD [[gnu::warn_unused_result]]
+#else
+#define NODISCARD
+#endif
 
 class Graph {
 
-public:
-    struct Node {
+private:
+    struct node {
         unsigned int color;
         bool preColored;
         std::vector<unsigned int> edges;
 
-        explicit Node(unsigned int color) : color(color), preColored(color != 0) {};
+        explicit node(unsigned int color) : color(color), preColored(color != 0) {};
     };
 
-private:
     unsigned int nbNodes;
     unsigned int nbColors;
-    std::vector<Node> nodes;
+    std::vector<node> nodes;
 
 public:
     explicit Graph(unsigned int nbColors) : nbNodes(0), nbColors(nbColors) {};
 
     explicit Graph(const std::string &fileName);
 
-    inline Node getNode(unsigned int i) const {
-        return nodes[i];
-    }
-
-    inline unsigned int getColor(unsigned int i) const {
+    NODISCARD inline unsigned int getColor(unsigned int i) const {
         return nodes[i].color;
     }
 
-    inline std::vector<unsigned int> getEdges(unsigned int i) const {
+    NODISCARD inline std::vector<unsigned int> getEdges(unsigned int i) const {
         return nodes[i].edges;
     }
 
-    inline bool isPreColored(unsigned int i) const {
+    NODISCARD inline bool isPreColored(unsigned int i) const {
         return nodes[i].preColored;
     }
 
-    inline unsigned int getNbColors() const {
+    NODISCARD inline unsigned int getNbColors() const {
         return nbColors;
     }
 
-    inline unsigned int getNbNodes() const {
+    NODISCARD inline unsigned int getNbNodes() const {
         return nbNodes;
     }
 
 
-    inline bool hasEdge(unsigned int first, unsigned int second) const {
+    NODISCARD inline bool hasEdge(unsigned int first, unsigned int second) const {
         const std::vector<unsigned int> &edges = nodes[first].edges;
         return std::find(edges.begin(), edges.end(), second) != edges.end();
     }
 
 
     inline void color(unsigned int i, unsigned int color) {
-        Node &node = nodes[i];
-        if (node.preColored)
+        if (nodes[i].preColored)
             throw std::runtime_error("Cannot change color of precolored nodes");
         if (color > nbColors)
             throw std::runtime_error("Color out of bounds");
-        node.color = color;
+        nodes[i].color = color;
     }
 
     inline void addNode(unsigned int color = 0) {
@@ -89,9 +88,9 @@ public:
             std::sort(node.edges.begin(), node.edges.end());
     }
 
-    bool isHappy(unsigned int node) const;
+    NODISCARD bool isHappy(unsigned int node) const;
 
-    unsigned int getHappyVertices() const;
+    NODISCARD unsigned int getHappyVertices() const;
 
     void writeToDot(const std::string &filename) const;
 
