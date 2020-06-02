@@ -37,8 +37,11 @@ cmake-build*/
 *.vs/
 out/
 
-*.png
-*.dot
-
 progress.txt
+results.txt
+out.png
+
 clusterGraphs/
+plots/
+
+*.dot

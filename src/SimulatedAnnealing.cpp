@@ -1,10 +1,10 @@
 #include "SimulatedAnnealing.h"
-#include "config.h"
 #include "ConstructiveAlgs.h"
 #include <random>
 #include <queue>
 #include <fstream>
 #include <ctime>
+#include <iostream>
 
 typedef std::mt19937_64 Rng;
 
@@ -58,7 +58,7 @@ std::vector<Group> generateGroups(const Graph &graph) {
     return groups;
 }
 
-void splitGroup(Graph &graph, Group &group, Rng &rng) {
+void splitGroup(Graph &graph, Group &group, Rng &rng, unsigned int &colorChanges) {
     std::vector<unsigned int> candidates;
 
     for (auto node: group.nodes) {
@@ -189,6 +189,7 @@ void splitGroup(Graph &graph, Group &group, Rng &rng) {
 
     for (unsigned int node: leftGroup)
         graph.color(node, color);
+    colorChanges += leftGroup.size();
 
     adjColors.clear();
     for (unsigned int node: rightGroup) {
@@ -204,6 +205,7 @@ void splitGroup(Graph &graph, Group &group, Rng &rng) {
 
     for (unsigned int node: rightGroup)
         graph.color(node, color);
+    colorChanges += rightGroup.size();
 }
 
 void swapDegreeBased(Graph &graph, Rng &rng) {
@@ -249,7 +251,7 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
     }
 }
 
-void mergeGroup(Graph &graph, Group &group, Rng &rng) {
+void mergeGroup(Graph &graph, Group &group, Rng &rng, unsigned int &colorChanges) {
     std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
     unsigned int nbColor = colorDistr(rng);
     auto it = group.adjColors.begin();
@@ -258,9 +260,10 @@ void mergeGroup(Graph &graph, Group &group, Rng &rng) {
 
     for (unsigned int node: group.nodes)
         graph.color(node, color);
+    colorChanges += group.nodes.size();
 }
 
-Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config) {
+Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config, unsigned int &colorChanges) {
     Graph newGraph = graph;
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
@@ -272,16 +275,17 @@ Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config) {
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
         Group group = groups[groupDistr(rng)];
-        splitGroup(newGraph, group, rng);
-    } else if (val < config.splitGroupPerc + config.swapDegreePerc)
+        splitGroup(newGraph, group, rng, colorChanges);
+    } else if (val < config.splitGroupPerc + config.swapDegreePerc) {
         swapDegreeBased(newGraph, rng);
-    else {
+        colorChanges += 1;
+    } else {
         const std::vector<Group> groups = generateGroups(graph);
         if (groups.size() <= 1)
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
         Group group = groups[groupDistr(rng)];
-        mergeGroup(newGraph, group, rng);
+        mergeGroup(newGraph, group, rng, colorChanges);
     }
 
     return newGraph;
@@ -333,6 +337,8 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     if (config.outputProgress)
         f.open("progress.txt");
 
+    unsigned int colorChanges = 0;
+
     double temperature = config.initTemp;
 
     const unsigned int nodes = graph.getNbNodes();
@@ -347,7 +353,7 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     clock_t clocks = 0;
     while ((config.maxIterations == -1 || i < config.maxIterations) &&
            (config.timeLimit == -1 || clocks < maxClocks)) {
-        Graph neighbour = generateNeighbour(graph, rng, config);
+        Graph neighbour = generateNeighbour(graph, rng, config, colorChanges);
         unsigned int newEnergy = nodes - neighbour.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
             graph = neighbour;
@@ -369,6 +375,8 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
 
     if (config.outputProgress)
         f.close();
+
+    std::cout << "Number of color changes: " << colorChanges << std::endl;
 
     graph = currBestGraph;
     return nodes - currBestEnergy;

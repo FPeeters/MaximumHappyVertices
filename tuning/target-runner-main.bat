@@ -14,7 +14,6 @@
 :: Exit with 0 if no error, with 1 in case of error
 ::##############################################################################
 
-:: Please change the EXE and FIXED_PARAMS to the correct ones
 SET "exe=cmake-build-visual-studio\main.exe"
 SET "fixed_params=-minimize -a simAnn -maxI 5000 -red articul -zeroTemp 0.05"
 

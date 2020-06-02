@@ -3,7 +3,7 @@ execDir = "../"
 trainInstancesDir = "../tuningInstances"
 
 # Linux
-#targetRunner = "./target-runner-growth"
+# targetRunner = "./target-runner-growth"
 # Windows
 targetRunner = "./target-runner-growth.bat"
 
