@@ -17,12 +17,17 @@
 class Graph {
 
 private:
+    enum happiness {
+        X, H, U
+    };
+
     struct node {
         unsigned int color;
         bool preColored;
         std::vector<unsigned int> edges;
+        happiness happyCache;
 
-        explicit node(unsigned int color) : color(color), preColored(color != 0) {};
+        explicit node(unsigned int color) : color(color), preColored(color != 0), edges(), happyCache(X) {};
     };
 
     unsigned int nbNodes;
@@ -30,7 +35,7 @@ private:
     std::vector<node> nodes;
 
 public:
-    explicit Graph(unsigned int nbColors) : nbNodes(0), nbColors(nbColors) {};
+    explicit Graph(unsigned int nbColors) : nbNodes(0), nbColors(nbColors), nodes() {};
 
     explicit Graph(const std::string &fileName);
 
@@ -67,6 +72,10 @@ public:
         if (color > nbColors)
             throw std::runtime_error("Color out of bounds");
         nodes[i].color = color;
+
+        nodes[i].happyCache = X;
+        for (unsigned int adj: nodes[i].edges)
+            nodes[adj].happyCache = X;
     }
 
     inline void addNode(unsigned int color = 0) {
@@ -88,13 +97,13 @@ public:
             std::sort(node.edges.begin(), node.edges.end());
     }
 
-    NODISCARD bool isHappy(unsigned int node) const;
+    NODISCARD bool isHappy(unsigned int node);
 
-    NODISCARD unsigned int getHappyVertices() const;
+    NODISCARD unsigned int getHappyVertices();
 
-    void writeToDot(const std::string &filename) const;
+    void writeToDot(const std::string &filename);
 
-    void writeToFile(const std::string &filename) const;
+    void writeToFile(const std::string &filename);
 };
 
 #endif //MAXHAPPYVERTS_GRAPH_H

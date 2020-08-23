@@ -49,10 +49,10 @@ int main(int argc, char **argv) {
         happy += reduced.colorOriginal();
 
         if (config.outputPngFilename != nullptr)
-            graph.writeToDot(config.outputPngFilename);
+            reduced.originalGraph.writeToDot(config.outputPngFilename);
 
         if (config.outputFilename != nullptr)
-            graph.writeToFile(config.outputFilename);
+            reduced.originalGraph.writeToFile(config.outputFilename);
 
         std::cout << std::endl;
         if (config.minimize)

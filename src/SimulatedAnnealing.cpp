@@ -19,61 +19,94 @@ void initRandomColoring(Graph &graph, Rng &rng) {
 struct colored_group {
     unsigned int color;
     std::vector<unsigned int> nodes;
-    std::set<unsigned int, std::greater<>> adjColors;
+    std::set<unsigned int> adjColors;
 
     explicit colored_group(unsigned int color, unsigned int node) : color(color), nodes(), adjColors() {
         nodes.push_back(node);
     }
+
+    bool removeNode(unsigned int node) {
+        nodes.erase(std::find(nodes.begin(), nodes.end(), node));
+        return nodes.empty();
+    }
+
+    void mergeGroup(const colored_group &other) {
+        if (this->color != other.color)
+            throw std::runtime_error("Merging different color groups");
+        nodes.insert(nodes.end(), other.nodes.begin(), other.nodes.end());
+        adjColors.insert(other.adjColors.begin(), other.adjColors.end());
+    }
 };
 
-std::vector<colored_group> generateGroups(const Graph &graph) {
+struct grouped_graph {
+    Graph graph;
     std::vector<colored_group> groups;
-    int *group = (int *) calloc(sizeof(int), graph.getNbNodes());
-    int groupCounter = 0;
-    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
-        if (graph.isPreColored(node)) {
-            group[node] = -1;
-            continue;
-        }
-        if (group[node] != 0)
-            continue;
+    std::vector<unsigned int> nodeGroups;
 
-        colored_group newGroup(graph.getColor(node), node);
-        group[node] = ++groupCounter;
-        std::queue<unsigned int> toCheck;
-        toCheck.push(node);
-
-        while (!toCheck.empty()) {
-            const unsigned int check = toCheck.front();
-            toCheck.pop();
-            for (unsigned int adj: graph.getEdges(check)) {
-                if (graph.getColor(adj) != newGroup.color)
-                    newGroup.adjColors.insert(graph.getColor(adj));
-
-                if (graph.getColor(adj) != newGroup.color || group[adj] != 0)
-                    continue;
-                if (graph.isPreColored(adj)) {
-                    group[adj] = -1;
-                    continue;
-                }
-
-                group[adj] = groupCounter;
-                newGroup.nodes.push_back(adj);
-                toCheck.push(adj);
-            }
-        }
-        if (!newGroup.adjColors.empty())
-            groups.push_back(newGroup);
+    explicit grouped_graph(const Graph &original) : graph(original), groups(),
+                                                    nodeGroups(original.getNbNodes(), original.getNbNodes()) {
+        generateGroups(original);
     }
-    return groups;
-}
 
-void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colorChanges) {
+    colored_group &getGroup(unsigned int node) {
+        return groups[nodeGroups[node]];
+    }
+
+    void removeGroup(unsigned int index) {
+        groups.erase(groups.begin() + index);
+        for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
+            if (nodeGroups[node] > index)
+                nodeGroups[node] -= 1;
+        }
+    }
+
+private:
+    void generateGroups(const Graph &original) {
+        int groupCounter = -1;
+        for (unsigned int node = 0; node < original.getNbNodes(); ++node) {
+            if (original.isPreColored(node)) {
+                nodeGroups[node] = -1;
+                continue;
+            }
+            if (nodeGroups[node] != graph.getNbNodes())
+                continue;
+
+            colored_group newGroup(original.getColor(node), node);
+            nodeGroups[node] = ++groupCounter;
+            std::queue<unsigned int> toCheck;
+            toCheck.push(node);
+
+            while (!toCheck.empty()) {
+                const unsigned int check = toCheck.front();
+                toCheck.pop();
+                for (unsigned int adj: original.getEdges(check)) {
+                    if (original.getColor(adj) != newGroup.color)
+                        newGroup.adjColors.insert(original.getColor(adj));
+
+                    if (original.getColor(adj) != newGroup.color || nodeGroups[adj] != graph.getNbNodes())
+                        continue;
+                    if (original.isPreColored(adj)) {
+                        nodeGroups[adj] = -1;
+                        continue;
+                    }
+
+                    nodeGroups[adj] = groupCounter;
+                    newGroup.nodes.push_back(adj);
+                    toCheck.push(adj);
+                }
+            }
+            groups.push_back(newGroup);
+        }
+    }
+};
+
+void splitGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, unsigned int &colorChanges) {
+    colored_group group = groupedGraph.groups[groupIdx];
     std::vector<unsigned int> candidates;
 
     for (auto node: group.nodes) {
-        for (auto adj: graph.getEdges(node)) {
-            if (graph.getColor(adj) != group.color) {
+        for (auto adj: groupedGraph.graph.getEdges(node)) {
+            if (groupedGraph.graph.getColor(adj) != group.color) {
                 candidates.push_back(node);
                 break;
             }
@@ -99,7 +132,7 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
 
     std::sort(group.nodes.begin(), group.nodes.end());
 
-    const std::vector<unsigned int> &leftInitEdges = graph.getEdges(leftSeed);
+    const std::vector<unsigned int> &leftInitEdges = groupedGraph.graph.getEdges(leftSeed);
     std::vector<unsigned int> diffEdges(leftInitEdges.size());
     auto iter = std::set_intersection(leftInitEdges.begin(), leftInitEdges.end(), group.nodes.begin(),
                                       group.nodes.end(), diffEdges.begin());
@@ -107,7 +140,7 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
     std::set<unsigned int> leftEdges(diffEdges.begin(), diffEdges.end());
     leftEdges.erase(rightSeed);
 
-    const std::vector<unsigned int> &rightInitEdges = graph.getEdges(rightSeed);
+    const std::vector<unsigned int> &rightInitEdges = groupedGraph.graph.getEdges(rightSeed);
     diffEdges.clear();
     diffEdges.resize(rightInitEdges.size());
     iter = std::set_intersection(rightInitEdges.begin(), rightInitEdges.end(), group.nodes.begin(), group.nodes.end(),
@@ -120,10 +153,18 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
 
     while (nbNodes > 2) {
         if (leftEdges.empty()) {
-            rightGroup.insert(rightEdges.begin(), rightEdges.end());
+            std::vector<unsigned int> diff(group.nodes.size());
+            iter = std::set_difference(group.nodes.begin(), group.nodes.end(), leftGroup.begin(), leftGroup.end(),
+                                       diff.begin());
+            diff.resize(iter - diff.begin());
+            rightGroup.insert(diff.begin(), diff.end());
             break;
         } else if (rightEdges.empty()) {
-            leftGroup.insert(leftEdges.begin(), leftEdges.end());
+            std::vector<unsigned int> diff(group.nodes.size());
+            iter = std::set_difference(group.nodes.begin(), group.nodes.end(), rightGroup.begin(), rightGroup.end(),
+                                       diff.begin());
+            diff.resize(iter - diff.begin());
+            leftGroup.insert(diff.begin(), diff.end());
             break;
         }
 
@@ -139,7 +180,7 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
 
             rightGroup.insert(adj);
 
-            const std::vector<unsigned int> &edges = graph.getEdges(adj);
+            const std::vector<unsigned int> &edges = groupedGraph.graph.getEdges(adj);
             std::vector<unsigned int> uni(edges.size());
             iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(),
                                          uni.begin());
@@ -163,7 +204,7 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
 
             leftGroup.insert(adj);
 
-            const std::vector<unsigned int> &edges = graph.getEdges(adj);
+            const std::vector<unsigned int> &edges = groupedGraph.graph.getEdges(adj);
             std::vector<unsigned int> intersect(edges.size());
             iter = std::set_intersection(group.nodes.begin(), group.nodes.end(), edges.begin(), edges.end(),
                                          intersect.begin());
@@ -187,8 +228,8 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
 
     std::set<unsigned int> adjColors;
     for (unsigned int node: leftGroup) {
-        for (unsigned int adj: graph.getEdges(node))
-            adjColors.insert(graph.getColor(adj));
+        for (unsigned int adj: groupedGraph.graph.getEdges(node))
+            adjColors.insert(groupedGraph.graph.getColor(adj));
     }
 
     std::uniform_int_distribution<unsigned int> colorDistr(0, adjColors.size() - 1);
@@ -197,14 +238,41 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
     for (; nbColor != 0; --nbColor) it++;
     unsigned int color = *it;
 
-    for (unsigned int node: leftGroup)
-        graph.color(node, color);
+    for (unsigned int node: leftGroup) {
+        groupedGraph.graph.color(node, color);
+        groupedGraph.nodeGroups[node] = groupedGraph.groups.size();
+    }
     colorChanges += leftGroup.size();
+
+    groupedGraph.removeGroup(groupIdx);
+
+    colored_group newLeftGroup(color, *leftGroup.begin());
+    newLeftGroup.nodes.insert(newLeftGroup.nodes.end(), ++leftGroup.begin(), leftGroup.end());
+
+    for (unsigned int node: leftGroup) {
+        for (unsigned int adj: groupedGraph.graph.getEdges(node)) {
+            if (!groupedGraph.graph.isPreColored(adj)
+                && !rightGroup.contains(adj)
+                && groupedGraph.nodeGroups[adj] != groupedGraph.nodeGroups[node]
+                && groupedGraph.graph.getColor(adj) == color) {
+
+                colored_group mergeGroup = groupedGraph.getGroup(adj);
+
+                newLeftGroup.mergeGroup(mergeGroup);
+                groupedGraph.removeGroup(groupedGraph.nodeGroups[adj]);
+                for (unsigned int mergeNode: mergeGroup.nodes)
+                    groupedGraph.nodeGroups[mergeNode] = groupedGraph.nodeGroups[node];
+            } else if (groupedGraph.graph.getColor(adj) != color)
+                newLeftGroup.adjColors.insert(groupedGraph.graph.getColor(adj));
+        }
+    }
+
+    groupedGraph.groups.push_back(newLeftGroup);
 
     adjColors.clear();
     for (unsigned int node: rightGroup) {
-        for (unsigned int adj: graph.getEdges(node))
-            adjColors.insert(graph.getColor(adj));
+        for (unsigned int adj: groupedGraph.graph.getEdges(node))
+            adjColors.insert(groupedGraph.graph.getColor(adj));
     }
 
     colorDistr = std::uniform_int_distribution<unsigned int>(0, adjColors.size() - 1);
@@ -213,16 +281,49 @@ void splitGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colo
     for (; nbColor != 0; --nbColor) it++;
     color = *it;
 
-    for (unsigned int node: rightGroup)
-        graph.color(node, color);
+    for (unsigned int node: rightGroup) {
+        groupedGraph.graph.color(node, color);
+        groupedGraph.nodeGroups[node] = groupedGraph.groups.size();
+    }
     colorChanges += rightGroup.size();
+
+    colored_group newRightGroup(color, *rightGroup.begin());
+    newRightGroup.nodes.insert(newRightGroup.nodes.end(), ++rightGroup.begin(), rightGroup.end());
+
+    for (unsigned int node: rightGroup) {
+        for (unsigned int adj: groupedGraph.graph.getEdges(node)) {
+            if (!groupedGraph.graph.isPreColored(adj)
+                && groupedGraph.nodeGroups[adj] != groupedGraph.nodeGroups[leftSeed]
+                && groupedGraph.nodeGroups[adj] != groupedGraph.nodeGroups[node]
+                && groupedGraph.graph.getColor(adj) == color) {
+
+                colored_group mergeGroup = groupedGraph.getGroup(adj);
+
+                newRightGroup.mergeGroup(mergeGroup);
+                groupedGraph.removeGroup(groupedGraph.nodeGroups[adj]);
+                for (unsigned int mergeNode: mergeGroup.nodes)
+                    groupedGraph.nodeGroups[mergeNode] = groupedGraph.nodeGroups[node];
+            } else if (groupedGraph.graph.getColor(adj) != color)
+                newRightGroup.adjColors.insert(groupedGraph.graph.getColor(adj));
+        }
+    }
+
+    if (newLeftGroup.color == newRightGroup.color) {
+        newLeftGroup.mergeGroup(newRightGroup);
+        groupedGraph.groups[groupedGraph.groups.size() - 1] = newLeftGroup;
+
+        for (unsigned int node: newRightGroup.nodes)
+            groupedGraph.nodeGroups[node] = groupedGraph.groups.size() - 1;
+    } else {
+        groupedGraph.groups.push_back(newRightGroup);
+    }
 }
 
-void swapDegreeBased(Graph &graph, Rng &rng) {
+void swapDegreeBased(grouped_graph &groupedGraph, Rng &rng) {
     unsigned int nbEdges = 0;
-    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
-        if (!graph.isPreColored(node))
-            nbEdges += graph.getEdges(node).size();
+    for (unsigned int node = 0; node < groupedGraph.graph.getNbNodes(); ++node) {
+        if (!groupedGraph.graph.isPreColored(node))
+            nbEdges += groupedGraph.graph.getEdges(node).size();
     }
     if (nbEdges == 0)
         return;
@@ -231,9 +332,9 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
     unsigned int pickedDegree = degreeDistr(rng);
 
     unsigned int pickedNode = -1;
-    for (unsigned int node = 0; node < graph.getNbNodes(); ++node) {
-        if (!graph.isPreColored(node)) {
-            const unsigned int degree = graph.getEdges(node).size();
+    for (unsigned int node = 0; node < groupedGraph.graph.getNbNodes(); ++node) {
+        if (!groupedGraph.graph.isPreColored(node)) {
+            const unsigned int degree = groupedGraph.graph.getEdges(node).size();
             if (pickedDegree >= degree)
                 pickedDegree -= degree;
             else {
@@ -244,58 +345,117 @@ void swapDegreeBased(Graph &graph, Rng &rng) {
     }
 
     std::set<unsigned int> adjColors;
-    for (unsigned int adj: graph.getEdges(pickedNode)) {
-        if (graph.getColor(adj) != graph.getColor(pickedNode))
-            adjColors.insert(graph.getColor(adj));
+    for (unsigned int adj: groupedGraph.graph.getEdges(pickedNode)) {
+        if (groupedGraph.graph.getColor(adj) != groupedGraph.graph.getColor(pickedNode))
+            adjColors.insert(groupedGraph.graph.getColor(adj));
     }
 
     if (adjColors.empty()) {
-        std::uniform_int_distribution<unsigned int> colorDistr(1, graph.getNbColors());
-        graph.color(pickedNode, colorDistr(rng));
+        std::uniform_int_distribution<unsigned int> colorDistr(1, groupedGraph.graph.getNbColors());
+        unsigned int color = colorDistr(rng);
+        groupedGraph.graph.color(pickedNode, color);
+
+        if (groupedGraph.getGroup(pickedNode).removeNode(pickedNode))
+            groupedGraph.removeGroup(groupedGraph.nodeGroups[pickedNode]);
+
+        colored_group newGroup(color, pickedNode);
+        groupedGraph.nodeGroups[pickedNode] = groupedGraph.groups.size();
+        groupedGraph.groups.push_back(newGroup);
     } else {
         std::uniform_int_distribution<unsigned int> colorDistr(0, adjColors.size() - 1);
         unsigned int nbColor = colorDistr(rng);
         auto it = adjColors.begin();
         for (; nbColor != 0; --nbColor) it++;
-        graph.color(pickedNode, *it);
+        unsigned int color = *it;
+        groupedGraph.graph.color(pickedNode, color);
+
+        if (groupedGraph.getGroup(pickedNode).removeNode(pickedNode))
+            groupedGraph.removeGroup(groupedGraph.nodeGroups[pickedNode]);
+
+        colored_group newGroup(color, pickedNode);
+        newGroup.adjColors = adjColors;
+        groupedGraph.nodeGroups[pickedNode] = groupedGraph.groups.size();
+        std::set<unsigned int> mergeGroups;
+        for (unsigned int adj: groupedGraph.graph.getEdges(pickedNode)) {
+            if (!groupedGraph.graph.isPreColored(adj)
+                && groupedGraph.graph.getColor(adj) == color
+                && groupedGraph.nodeGroups[adj] != groupedGraph.groups.size()) {
+
+                colored_group group = groupedGraph.getGroup(adj);
+                newGroup.mergeGroup(group);
+                groupedGraph.removeGroup(groupedGraph.nodeGroups[adj]);
+                for (unsigned int node: group.nodes)
+                    groupedGraph.nodeGroups[node] = groupedGraph.groups.size();
+            }
+        }
+
+        groupedGraph.groups.push_back(newGroup);
     }
 }
 
-void mergeGroup(Graph &graph, colored_group &group, Rng &rng, unsigned int &colorChanges) {
-    std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
-    unsigned int nbColor = colorDistr(rng);
-    auto it = group.adjColors.begin();
-    for (; nbColor != 0; --nbColor) it++;
-    unsigned int color = *it;
+void mergeGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, unsigned int &colorChanges) {
+    colored_group group = groupedGraph.groups[groupIdx];
+
+    unsigned int color;
+    if (group.adjColors.empty()) {
+        std::uniform_int_distribution<unsigned int> colorDistr(1, groupedGraph.graph.getNbColors());
+        color = colorDistr(rng);
+    } else {
+        std::uniform_int_distribution<unsigned int> colorDistr(0, group.adjColors.size() - 1);
+        unsigned int nbColor = colorDistr(rng);
+        auto it = group.adjColors.begin();
+        for (; nbColor != 0; --nbColor) it++;
+        color = *it;
+    }
 
     for (unsigned int node: group.nodes)
-        graph.color(node, color);
+        groupedGraph.graph.color(node, color);
     colorChanges += group.nodes.size();
+
+    group.color = color;
+    group.adjColors.clear();
+
+    std::vector<unsigned int> originalNodes = group.nodes;
+    for (unsigned int node: originalNodes) {
+        for (unsigned int adj: groupedGraph.graph.getEdges(node)) {
+            if (!groupedGraph.graph.isPreColored(adj)
+                && groupedGraph.nodeGroups[adj] != groupedGraph.nodeGroups[node]
+                && groupedGraph.graph.getColor(adj) == color) {
+
+                colored_group mergeGroup = groupedGraph.getGroup(adj);
+
+                group.mergeGroup(mergeGroup);
+                groupedGraph.removeGroup(groupedGraph.nodeGroups[adj]);
+                for (unsigned int mergeNode: mergeGroup.nodes)
+                    groupedGraph.nodeGroups[mergeNode] = groupedGraph.nodeGroups[node];
+            } else if (groupedGraph.graph.getColor(adj) != color)
+                group.adjColors.insert(groupedGraph.graph.getColor(adj));
+        }
+    }
+
+    groupedGraph.groups[groupedGraph.nodeGroups[*group.nodes.begin()]] = group;
 }
 
-Graph generateNeighbour(const Graph &graph, Rng &rng, const config &config, unsigned int &colorChanges) {
-    Graph newGraph = graph;
+grouped_graph
+generateNeighbour(const grouped_graph &groupedGraph, Rng &rng, const config &config, unsigned int &colorChanges) {
+    grouped_graph newGraph(groupedGraph);
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
     const double val = splitDistr(rng);
 
     if (val < config.splitGroupPerc) {
-        const std::vector<colored_group> groups = generateGroups(graph);
-        if (groups.size() <= 1)
+        if (newGraph.groups.size() <= 1)
             return newGraph;
-        std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
-        colored_group group = groups[groupDistr(rng)];
-        splitGroup(newGraph, group, rng, colorChanges);
+        std::uniform_int_distribution<unsigned int> groupDistr(0, newGraph.groups.size() - 1);
+        splitGroup(newGraph, groupDistr(rng), rng, colorChanges);
     } else if (val < config.splitGroupPerc + config.swapDegreePerc) {
         swapDegreeBased(newGraph, rng);
         colorChanges += 1;
     } else {
-        const std::vector<colored_group> groups = generateGroups(graph);
-        if (groups.size() <= 1)
+        if (newGraph.groups.size() <= 1)
             return newGraph;
-        std::uniform_int_distribution<unsigned int> groupDistr(0, groups.size() - 1);
-        colored_group group = groups[groupDistr(rng)];
-        mergeGroup(newGraph, group, rng, colorChanges);
+        std::uniform_int_distribution<unsigned int> groupDistr(0, newGraph.groups.size() - 1);
+        mergeGroup(newGraph, groupDistr(rng), rng, colorChanges);
     }
 
     return newGraph;
@@ -358,21 +518,23 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     unsigned int currBestEnergy = energy;
     Graph currBestGraph = graph;
 
+    grouped_graph groupedGraph(graph);
+
     unsigned int i = 0;
     clock_t startClock = clock();
     clock_t maxClocks = config.timeLimit * CLOCKS_PER_SEC;
     clock_t clocks = 0;
     while ((config.maxIterations == -1 || i < config.maxIterations) &&
            (config.timeLimit == -1 || clocks < maxClocks)) {
-        Graph neighbour = generateNeighbour(graph, rng, config, colorChanges);
-        unsigned int newEnergy = nodes - neighbour.getHappyVertices();
+        grouped_graph neighbour = generateNeighbour(groupedGraph, rng, config, colorChanges);
+        unsigned int newEnergy = nodes - neighbour.graph.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
-            graph = neighbour;
+            groupedGraph = neighbour;
             energy = newEnergy;
 
             if (energy < currBestEnergy) {
                 currBestEnergy = energy;
-                currBestGraph = graph;
+                currBestGraph = groupedGraph.graph;
             }
         }
         temperature = coolTemperature(config, i, clocks);

@@ -41,7 +41,7 @@ progress.txt
 results.txt
 out.png
 
-clusterGraphs/
+linearGraphs/
 plots/
 
 *.dot

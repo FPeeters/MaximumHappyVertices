@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
+Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0), nodes() {
     ifstream inStream;
     inStream.open(fileName);
     if (inStream.fail())
@@ -69,7 +69,7 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
         throw runtime_error("A precoloring was given for a node with an index out of bounds");
 
     if (nbEdges != edges.size())
-        throw runtime_error("Defined nubmer of edges is not equal to the amount of 'e' lines");
+        throw runtime_error("Defined number of edges is not equal to the amount of 'e' lines");
 
     for (auto edge : edges) {
         if (hasEdge(edge.first, edge.second))
@@ -80,7 +80,10 @@ Graph::Graph(const std::string &fileName) : nbColors(0), nbNodes(0) {
     sortEdges();
 }
 
-bool Graph::isHappy(const unsigned int node) const {
+bool Graph::isHappy(const unsigned int node) {
+    if (nodes[node].happyCache != X)
+        return nodes[node].happyCache == H;
+
     bool happy = true;
     for (unsigned int adj: getEdges(node)) {
         if (getColor(node) != getColor(adj)) {
@@ -88,10 +91,11 @@ bool Graph::isHappy(const unsigned int node) const {
             break;
         }
     }
+    nodes[node].happyCache = (happy ? H : U);
     return happy;
 }
 
-unsigned int Graph::getHappyVertices() const {
+unsigned int Graph::getHappyVertices() {
     unsigned int count = 0;
     for (unsigned int node = 0; node < nbNodes; ++node) {
         if (isHappy(node))
@@ -101,7 +105,7 @@ unsigned int Graph::getHappyVertices() const {
 }
 
 
-void Graph::writeToDot(const std::string &filename) const {
+void Graph::writeToDot(const std::string &filename) {
     ofstream out;
     out.open(filename + ".dot");
 
@@ -119,7 +123,8 @@ void Graph::writeToDot(const std::string &filename) const {
         return;
     }
 
-    static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen", "fuchsia",
+    static const std::string COLORS[11]{"black", "darkgreen", "darkblue", "maroon", "red", "gold", "lawngreen",
+                                        "fuchsia",
                                         "cornflowerblue", "aqua", "peachpuff"};
 
     for (unsigned int node = 0; node < nbNodes; ++node) {
@@ -127,6 +132,7 @@ void Graph::writeToDot(const std::string &filename) const {
             out << "\tn" << node << " [shape=square,color=" << COLORS[getColor(node)];
         else
             out << "\tn" << node << " [shape=circle,color=" << COLORS[getColor(node)];
+//        out << ",label=" << node;
         if (!isHappy(node))
             out << ",label=U";
         out << "]" << endl;
@@ -154,7 +160,7 @@ void Graph::writeToDot(const std::string &filename) const {
     remove((filename + ".dot").c_str());
 }
 
-void Graph::writeToFile(const std::string &filename) const {
+void Graph::writeToFile(const std::string &filename) {
     ofstream out;
     out.open(filename);
 

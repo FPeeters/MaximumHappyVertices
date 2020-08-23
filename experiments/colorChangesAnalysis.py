@@ -17,13 +17,14 @@ print(data.groupby(["method"]).mean()[["simAnn", "simAnnTime", "tabu", "tabuTime
 print("\nAverage ifv nbColors, precolor")
 print(data.groupby(["nbColors", "precolor"]).mean()[["simAnn", "simAnnTime", "tabu", "tabuTime"]])
 
-data.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["simAnn", "tabu"],
-                                         label=["Sim. Ann.", "Tabu"])
-plt.ylabel("# Kleurveranderingen")
-plt.ticklabel_format(axis="y", style="sci", scilimits=(3, 3))
+mean = data.groupby("avgDegreeCut").mean()
+mean[["simAnn", "tabu"]] = mean[["simAnn", "tabu"]].div(1000)
+mean.plot(x="Gemiddelde graad", y=["simAnn", "tabu"],
+                    label=["Sim. Ann.", "Tabu"])
+plt.ylabel("# Kleurveranderingen (10^3)")
 plt.savefig("colorchanges.png")
 
-data.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["simAnnTime", "tabuTime"],
-                                         label=["Sim. Ann.", "Tabu"])
+mean.plot(x="Gemiddelde graad", y=["simAnnTime", "tabuTime"],
+          label=["Sim. Ann.", "Tabu"])
 plt.ylabel("Uitvoeringstijd (s)")
 plt.savefig("colorchanges_time.png")

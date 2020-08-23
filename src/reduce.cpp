@@ -430,6 +430,7 @@ reduced_graph::reduced_graph(Graph &original, const config &config) : originalGr
 unsigned int reduced_graph::colorOriginal() {
     switch (mode) {
         case config::NONE:
+            originalGraph = reducedGraph;
             return 0;
         case config::THIRUVADY:
             for (unsigned int node = 0; node < originalGraph.getNbNodes(); ++node) {
