@@ -1,6 +1,8 @@
 #include <queue>
+#include <stack>
 #include <ostream>
 #include <set>
+#include <utility>
 #include "reduce.h"
 
 std::vector<unsigned int> findChain(Graph &graph, unsigned int node, unsigned int &anchor) {
@@ -107,7 +109,9 @@ depthFirstSearch(const Graph &graph, unsigned int node, unsigned int currentDept
         if (!visited[adj]) {
             parent[adj] = node;
             ++childCount;
+
             depthFirstSearch(graph, adj, currentDepth + 1, visited, depth, low, parent, articulation);
+
             if (low[adj] >= depth[node])
                 articulation[node] = true;
             low[node] = std::min(low[node], low[adj]);
@@ -119,6 +123,70 @@ depthFirstSearch(const Graph &graph, unsigned int node, unsigned int currentDept
         articulation[node] = childCount > 1;
     if (graph.getEdges(node).size() == 2)
         articulation[node] = false;
+}
+
+struct stackItem {
+    const unsigned int grandparent;
+    const unsigned int parent;
+    const std::vector<unsigned int> children;
+    unsigned int pos;
+
+    explicit stackItem(const unsigned grandparent, const unsigned int parent, std::vector<unsigned int> children)
+            : grandparent(grandparent), parent(parent), children(std::move(children)), pos(0) {}
+};
+
+void iterativeDepthFirstSearch(const Graph &graph, bool *articulation) {
+    auto visited = (bool *) calloc(graph.getNbNodes(), sizeof(bool));
+    auto discovery = (unsigned int *) calloc(graph.getNbNodes(), sizeof(unsigned int));
+    auto low = (unsigned int *) calloc(graph.getNbNodes(), sizeof(unsigned int));
+
+    for (unsigned int start = 0; start < graph.getNbNodes(); start++) {
+        if (visited[start])
+            continue;
+
+        unsigned int depth = 0;
+        discovery[start] = 0;
+        low[start] = 0;
+        unsigned int rootChildren = 0;
+        visited[start] = true;
+
+        std::stack<stackItem> stack;
+        stack.emplace(start, start, graph.getEdges(start));
+
+        while (!stack.empty()) {
+            stackItem &item = stack.top();
+
+            if (item.pos < item.children.size()) {
+                unsigned int child = item.children[item.pos++];
+
+                if (item.grandparent == child)
+                    continue;
+
+                if (visited[child]) {
+                    if (discovery[child] <= discovery[item.parent])
+                        low[item.parent] = std::min(low[item.parent], discovery[child]);
+                } else {
+                    depth++;
+                    low[child] = depth;
+                    discovery[child] = depth;
+                    visited[child] = true;
+                    stack.emplace(item.parent, child, graph.getEdges(child));
+                }
+            } else {
+                stack.pop();
+                if (stack.size() > 1) {
+                    if (low[item.parent] >= discovery[item.grandparent])
+                        articulation[item.grandparent] = graph.getEdges(item.grandparent).size() != 2;
+
+                    low[item.grandparent] = std::min(low[item.parent], low[item.grandparent]);
+                } else if (!stack.empty()) {
+                    rootChildren++;
+                }
+            }
+        }
+        if (rootChildren > 1)
+            articulation[start] = graph.getEdges(start).size() != 2;
+    }
 }
 
 std::vector<unsigned int> buildReducedGraph(Graph &original, Graph &reduced, unsigned int *replacements) {
@@ -302,23 +370,25 @@ void reduced_graph::articulationReduction() {
         auto *replacements = (unsigned int *) malloc(sizeof(unsigned int) * currentGraph.getNbNodes());
         std::fill_n(replacements, currentGraph.getNbNodes(), -2);
 
-        auto visited = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
-        auto depth = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
-        auto low = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
-        auto parent = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
-        std::fill_n(parent, currentGraph.getNbNodes(), -1);
+//        auto visited = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
+//        auto depth = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+//        auto low = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+//        auto parent = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
+//        std::fill_n(parent, currentGraph.getNbNodes(), -1);
         auto articulation = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
 
-        for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
-            if (!visited[node])
-                depthFirstSearch(currentGraph, node, 0, visited, depth, low, parent, articulation);
-        }
+//        for (unsigned int node = 0; node < currentGraph.getNbNodes(); ++node) {
+//            if (!visited[node])
+//                depthFirstSearch(currentGraph, node, 0, visited, depth, low, parent, articulation);
+//        }
+        iterativeDepthFirstSearch(currentGraph, articulation);
 
-        std::fill_n(visited, currentGraph.getNbNodes(), false);
-        free(depth);
-        free(low);
-        free(parent);
+//        std::fill_n(visited, currentGraph.getNbNodes(), false);
+//        free(depth);
+//        free(low);
+//        free(parent);
 
+        auto visited = (bool *) calloc(currentGraph.getNbNodes(), sizeof(bool));
         auto *replacedReferences = (unsigned int *) calloc(currentGraph.getNbNodes(), sizeof(unsigned int));
         std::fill_n(replacedReferences, currentGraph.getNbNodes(), -1);
 
@@ -510,7 +580,7 @@ void reduced_graph::writeStats(std::ostream &out) {
             out << "Articulation reduce stats: " << std::endl
                 << stats.nbIterations << " Iterations in articulation phase" << std::endl
                 << stats.freeArticulation << " Nodes from free components removed in articulation phase" << std::endl
-                << stats.singleArticulation << " Nodes removed from single connection compoments in articulation phase"
+                << stats.singleArticulation << " Nodes removed from single connection components in articulation phase"
                 << std::endl
                 << stats.unhappyConnections << " Unhappy nodes removed in second phase" << std::endl
                 << stats.unconnectedComponent << " Unconnected nodes removed in second phase" << std::endl
