@@ -52,20 +52,23 @@ def run_instance(filename, method, nbNodes, nbColors, preColor, degree, alpha, s
         growth_result.check_returncode()
         growth = growth_result.stdout.split("\n")[-1]
 
-        sim_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "simAnn", "-red", "articul",
-                                     "-init", "best", "-time", "5", "-temp", "163", "-zeroTemp", "0.05",
-                                     "-swap", "0.5", "-split", "0.25"],
-                                    stdout=subprocess.PIPE, universal_newlines=True)
-        sim_result.check_returncode()
-        simAnn = int(sim_result.stdout.split("\n")[-1])
+        simAnn = []
+        tabu = []
+        for exe_time in [30]:
+            sim_result = subprocess.run([exe_dir + os.path.sep + "main", filename, "-a", "simAnn", "-red", "articul",
+                                         "-init", "best", "-time", str(exe_time), "-temp", "163", "-zeroTemp", "0.05",
+                                         "-swap", "0.5", "-split", "0.25"],
+                                        stdout=subprocess.PIPE, universal_newlines=True)
+            sim_result.check_returncode()
+            simAnn.append(sim_result.stdout.split("\n")[-1])
 
-        tabu_result = subprocess.run([exe_dir + os.path.sep + "happyTabu", filename, "-t", "5"],
-                                     stdout=subprocess.PIPE, universal_newlines=True)
-        tabu = tabu_result.stdout.split("\n")[-2].split("\t")[8]
+            tabu_result = subprocess.run([exe_dir + os.path.sep + "happyTabu", filename, "-t", str(exe_time)],
+                                         stdout=subprocess.PIPE, universal_newlines=True)
+            tabu.append(tabu_result.stdout.split("\n")[-2].split("\t")[8])
 
         if method != "linear":
             os.remove(filename)
-        return [method] + gen + [greedy, growth, simAnn, tabu], time.time() - t
+        return [method] + gen + [greedy, growth] + simAnn + tabu, time.time() - t
     except Exception as e:
         print(filename, e)
         return [], time.time() - t
@@ -98,15 +101,15 @@ if __name__ == '__main__':
     file = open("results.txt", "w", newline="")
     writer = csv.writer(file)
 
-    nbNodes_options = [1000]
+    nbNodes_options = [10000]
     nbColor_options = [10, 50]
     preColor_options = [0.05, 0.15, 0.25]
 
     degree_options = range(1, 26)
-    alpha_options = [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
+    alpha_options = []  # [-2., -1.5, -1., -0.5, 0, 0.5, 1., 1.5, 2]
     scale_options = range(1, 13)
-    # [591, 8412, 2107, 959, 3521, 9125, 2276, 2568, 2543, 29]
-    seed_options = [7131, 564, 2502, 4295, 5309, 2750, 319, 7074, 2605, 9193]
+    # [591, 8412, 2107, 959, 3521, ]
+    seed_options = [9125, 2276, 2568, 2543, 29] # , 7131, 564, 2502, 4295, 5309, 2750, 319, 7074, 2605, 9193]
 
     nbGraphs = len(nbNodes_options) * len(nbColor_options) * len(preColor_options) * (
             len(degree_options) * (1 + len(alpha_options)) + len(scale_options)) * len(seed_options)

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-data = pd.read_csv("tabuResults.txt", header=None,
+data = pd.read_csv("newTabuResults.txt", header=None,
                    names=["method", "n", "nbColors", "precolor", "seed", "Gemiddelde graad", "alpha",
                           "greedy", "growth", "simAnn", "tabu"])
 
@@ -18,15 +18,23 @@ print(data["Gemiddelde graad"][~data["better"]].mean())
 
 binnedmean = data.groupby("avgDegreeCut").mean()
 
-divmean = binnedmean[["greedy", "growth", "simAnn", "tabu"]].div(
-    binnedmean[["greedy", "growth", "simAnn", "tabu"]].max(axis=1), axis=0)
-divmean["Gemiddelde graad"] = binnedmean["Gemiddelde graad"]
-divmean.plot(x="Gemiddelde graad", y=["greedy", "growth", "simAnn", "tabu"],
-             label=["Greedy", "Growth", "Sim. Annealing", "Tabu-search"])
-plt.ylabel("Rel. gemiddeld # Happy knopen")
-plt.savefig("tabu_vgl_growth.png")
+divmean = data[["greedy", "growth", "simAnn", "tabu"]].div(
+    data[["greedy", "growth", "simAnn", "tabu"]].max(axis=1), axis=0)
+divmean["avgDegreeCut"] = data["avgDegreeCut"]
+divmean["Gemiddelde graad"] = data["Gemiddelde graad"]
+divmean.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["greedy", "growth", "simAnn", "tabu"],
+             label=["Greedy", "Growth", "Sim. Annealing", "Tabu-search"], color='black')
+plt.gca().get_lines()[0].set_linestyle('--')
+plt.gca().get_lines()[1].set_linestyle('-')
+plt.gca().get_lines()[2].set_linestyle('-.')
+plt.gca().get_lines()[3].set_linestyle(':')
+plt.legend()
+plt.xlabel("Average degree")
+plt.ylabel("Relative performance")
+plt.savefig("tabu_vgl_growth.eps")
+plt.savefig("tabu_vgl_growth_new.png")
 
-divmean.plot(x="Gemiddelde graad", y=["greedy", "simAnn", "tabu"],
+divmean.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["greedy", "simAnn", "tabu"],
              label=["Greedy", "Sim. Annealing", "Tabu-search"])
 plt.ylabel("Rel. gemiddeld # Happy knopen")
-plt.savefig("tabu_vgl.png")
+plt.savefig("tabu_vgl_new.png")

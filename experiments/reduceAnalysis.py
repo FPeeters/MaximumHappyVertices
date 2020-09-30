@@ -33,6 +33,18 @@ data[linear].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["Eenvo
 plt.ylabel("# knopen")
 plt.savefig("reductie_linear.png")
 
+data.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["Eenvoudig", "Articulatie"])
+plt.ylabel("# knopen")
+plt.savefig("reductie_all.png")
+
+data.groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y=["thiruvady", "articul"], label=["Thiruvady", "Articulation"], marker='^', color='black')
+plt.gca().get_lines()[0].set_marker('s')
+plt.legend()
+plt.xlabel("Average degree")
+plt.ylabel("# reduced vertices")
+plt.savefig("reduce_results.eps")
+plt.savefig("reduce_results.png")
+
 plt.figure()
 data[random].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y="articul", label="Random", ax=(plt.gca()))
 data[linear].groupby("avgDegreeCut").mean().plot(x="Gemiddelde graad", y="articul", label="Lineair", ax=(plt.gca()))

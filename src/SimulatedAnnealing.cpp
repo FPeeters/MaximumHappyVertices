@@ -100,7 +100,7 @@ private:
     }
 };
 
-void splitGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, unsigned int &colorChanges) {
+void splitGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng) {
     colored_group group = groupedGraph.groups[groupIdx];
     std::vector<unsigned int> candidates;
 
@@ -242,7 +242,6 @@ void splitGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, un
         groupedGraph.graph.color(node, color);
         groupedGraph.nodeGroups[node] = groupedGraph.groups.size();
     }
-    colorChanges += leftGroup.size();
 
     groupedGraph.removeGroup(groupIdx);
 
@@ -285,7 +284,6 @@ void splitGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, un
         groupedGraph.graph.color(node, color);
         groupedGraph.nodeGroups[node] = groupedGraph.groups.size();
     }
-    colorChanges += rightGroup.size();
 
     colored_group newRightGroup(color, *rightGroup.begin());
     newRightGroup.nodes.insert(newRightGroup.nodes.end(), ++rightGroup.begin(), rightGroup.end());
@@ -393,7 +391,7 @@ void swapDegreeBased(grouped_graph &groupedGraph, Rng &rng) {
     }
 }
 
-void mergeGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, unsigned int &colorChanges) {
+void mergeGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng) {
     colored_group group = groupedGraph.groups[groupIdx];
 
     unsigned int color;
@@ -410,7 +408,6 @@ void mergeGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, un
 
     for (unsigned int node: group.nodes)
         groupedGraph.graph.color(node, color);
-    colorChanges += group.nodes.size();
 
     group.color = color;
     group.adjColors.clear();
@@ -437,7 +434,7 @@ void mergeGroup(grouped_graph &groupedGraph, unsigned int groupIdx, Rng &rng, un
 }
 
 grouped_graph
-generateNeighbour(const grouped_graph &groupedGraph, Rng &rng, const config &config, unsigned int &colorChanges) {
+generateNeighbour(const grouped_graph &groupedGraph, Rng &rng, const config &config) {
     grouped_graph newGraph(groupedGraph);
 
     std::uniform_real_distribution<double> splitDistr(0, 1);
@@ -447,15 +444,14 @@ generateNeighbour(const grouped_graph &groupedGraph, Rng &rng, const config &con
         if (newGraph.groups.size() <= 1)
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, newGraph.groups.size() - 1);
-        splitGroup(newGraph, groupDistr(rng), rng, colorChanges);
+        splitGroup(newGraph, groupDistr(rng), rng);
     } else if (val < config.splitGroupPerc + config.swapDegreePerc) {
         swapDegreeBased(newGraph, rng);
-        colorChanges += 1;
     } else {
         if (newGraph.groups.size() <= 1)
             return newGraph;
         std::uniform_int_distribution<unsigned int> groupDistr(0, newGraph.groups.size() - 1);
-        mergeGroup(newGraph, groupDistr(rng), rng, colorChanges);
+        mergeGroup(newGraph, groupDistr(rng), rng);
     }
 
     return newGraph;
@@ -486,6 +482,8 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
     Rng rng = Rng(config.seed);
     std::uniform_real_distribution<double> swapDistr(0, 1);
 
+    float startTime = clock();
+
     switch (config.initAlgorithm) {
         case config::random:
             initRandomColoring(graph, rng);
@@ -504,11 +502,12 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
             break;
     }
 
+    std::cout << "Initial solution done after " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+    startTime = clock();
+
     std::ofstream f;
     if (config.outputProgress)
         f.open("progress.txt");
-
-    unsigned int colorChanges = 0;
 
     double temperature = config.initTemp;
 
@@ -520,13 +519,16 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
 
     grouped_graph groupedGraph(graph);
 
+    std::cout << "Built groups after " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+    startTime = clock();
+
     unsigned int i = 0;
     clock_t startClock = clock();
-    clock_t maxClocks = config.timeLimit * CLOCKS_PER_SEC;
+    clock_t maxClocks = config.timeLimit != -1 ? config.timeLimit * CLOCKS_PER_SEC : LONG_MAX;
     clock_t clocks = 0;
     while ((config.maxIterations == -1 || i < config.maxIterations) &&
            (config.timeLimit == -1 || clocks < maxClocks)) {
-        grouped_graph neighbour = generateNeighbour(groupedGraph, rng, config, colorChanges);
+        grouped_graph neighbour = generateNeighbour(groupedGraph, rng, config);
         unsigned int newEnergy = nodes - neighbour.graph.getHappyVertices();
         if (swapDistr(rng) < swapProbability(energy, newEnergy, temperature)) {
             groupedGraph = neighbour;
@@ -546,10 +548,10 @@ unsigned int simulatedAnnealing(Graph &graph, const config &config) {
         clocks = clock() - startClock;
     }
 
+    std::cout << i << " iterations done after " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+
     if (config.outputProgress)
         f.close();
-
-    std::cout << "Number of color changes: " << colorChanges << std::endl;
 
     graph = currBestGraph;
     return nodes - currBestEnergy;

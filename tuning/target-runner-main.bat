@@ -15,7 +15,7 @@
 ::##############################################################################
 
 SET "exe=cmake-build-visual-studio\main.exe"
-SET "fixed_params=-minimize -a simAnn -maxI 5000 -red articul -zeroTemp 0.05"
+SET "fixed_params=-minimize -a simAnn -time 5 -red articul -zeroTemp 0.05"
 
 FOR /f "tokens=1-4*" %%a IN ("%*") DO (
 	SET candidate=%%a

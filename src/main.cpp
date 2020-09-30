@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 #include "Graph.h"
 #include "ConstructiveAlgs.h"
 #include "SimulatedAnnealing.h"
@@ -12,9 +13,17 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
 
     try {
+        float startTime = clock();
+
         Graph graph(config.inputFilename);
+        std::cout << "Load took " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+        startTime = clock();
+
         reduced_graph reduced(graph, config);
         reduced.writeStats(std::cout);
+
+        std::cout << "Reduce took " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+        startTime = clock();
 
         unsigned int happy = 0;
 
@@ -45,6 +54,8 @@ int main(int argc, char **argv) {
                     break;
             }
         }
+
+        std::cout << "Algorithm took " << (clock() - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
 
         happy += reduced.colorOriginal();
 

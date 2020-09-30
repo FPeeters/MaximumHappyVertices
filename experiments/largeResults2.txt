@@ -1,0 +1,779 @@
+----------------------------------------
+../largeGraphs\largeRandom1.txt -- SIMANN
+Load took 0.62 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+609 Nodes from free components removed in articulation phase
+3105 Nodes removed from single connection components in articulation phase
+11 Unhappy nodes removed in second phase
+66 Unconnected nodes removed in second phase
+
+Reduce took 0.757 sec
+Executing simulated annealing
+Initial solution done after 6.356 sec
+Built groups after 0.061 sec
+71289 iterations done after 1800.02 sec
+Algorithm took 1806.51 sec
+
+55799
+
+----------------------------------------
+../largeGraphs\largeRandom10.txt -- SIMANN
+Load took 0.331 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+574 Nodes from free components removed in articulation phase
+3053 Nodes removed from single connection components in articulation phase
+12 Unhappy nodes removed in second phase
+73 Unconnected nodes removed in second phase
+
+Reduce took 0.411 sec
+Executing simulated annealing
+Initial solution done after 5.599 sec
+Built groups after 0.044 sec
+78473 iterations done after 1811.88 sec
+Algorithm took 1817.56 sec
+
+55742
+
+----------------------------------------
+../largeGraphs\largeRandom11.txt -- SIMANN
+Load took 0.344 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+587 Nodes from free components removed in articulation phase
+3102 Nodes removed from single connection components in articulation phase
+6 Unhappy nodes removed in second phase
+65 Unconnected nodes removed in second phase
+
+Reduce took 0.4 sec
+Executing simulated annealing
+Initial solution done after 5.552 sec
+Built groups after 0.043 sec
+79374 iterations done after 1800.01 sec
+Algorithm took 1805.66 sec
+
+55704
+
+----------------------------------------
+../largeGraphs\largeRandom12.txt -- SIMANN
+Load took 0.339 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+617 Nodes from free components removed in articulation phase
+3158 Nodes removed from single connection components in articulation phase
+8 Unhappy nodes removed in second phase
+65 Unconnected nodes removed in second phase
+
+Reduce took 0.394 sec
+Executing simulated annealing
+Initial solution done after 5.611 sec
+Built groups after 0.044 sec
+89816 iterations done after 1800.02 sec
+Algorithm took 1805.73 sec
+
+55795
+
+----------------------------------------
+../largeGraphs\largeRandom13.txt -- SIMANN
+Load took 0.331 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+609 Nodes from free components removed in articulation phase
+3116 Nodes removed from single connection components in articulation phase
+7 Unhappy nodes removed in second phase
+76 Unconnected nodes removed in second phase
+
+Reduce took 0.395 sec
+Executing simulated annealing
+Initial solution done after 5.591 sec
+Built groups after 0.043 sec
+55438 iterations done after 1800 sec
+Algorithm took 1805.67 sec
+
+55850
+
+----------------------------------------
+../largeGraphs\largeRandom14.txt -- SIMANN
+Load took 0.349 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+609 Nodes from free components removed in articulation phase
+3064 Nodes removed from single connection components in articulation phase
+11 Unhappy nodes removed in second phase
+63 Unconnected nodes removed in second phase
+
+Reduce took 0.393 sec
+Executing simulated annealing
+Initial solution done after 5.553 sec
+Built groups after 0.044 sec
+59553 iterations done after 1800.01 sec
+Algorithm took 1805.65 sec
+
+55851
+
+----------------------------------------
+../largeGraphs\largeRandom15.txt -- SIMANN
+Load took 0.328 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+628 Nodes from free components removed in articulation phase
+3124 Nodes removed from single connection components in articulation phase
+15 Unhappy nodes removed in second phase
+63 Unconnected nodes removed in second phase
+
+Reduce took 0.397 sec
+Executing simulated annealing
+Initial solution done after 5.578 sec
+Built groups after 0.043 sec
+86904 iterations done after 1800.01 sec
+Algorithm took 1805.7 sec
+
+55987
+
+----------------------------------------
+../largeGraphs\largeRandom16.txt -- SIMANN
+Load took 0.301 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+587 Nodes from free components removed in articulation phase
+3182 Nodes removed from single connection components in articulation phase
+7 Unhappy nodes removed in second phase
+72 Unconnected nodes removed in second phase
+
+Reduce took 0.407 sec
+Executing simulated annealing
+Initial solution done after 5.59 sec
+Built groups after 0.044 sec
+68443 iterations done after 1800 sec
+Algorithm took 1805.66 sec
+
+55894
+
+----------------------------------------
+../largeGraphs\largeRandom17.txt -- SIMANN
+Load took 0.343 sec
+Articulation reduce stats: 
+2 Iterations in articulation phase
+662 Nodes from free components removed in articulation phase
+2991 Nodes removed from single connection components in articulation phase
+13 Unhappy nodes removed in second phase
+65 Unconnected nodes removed in second phase
+
+Reduce took 0.294 sec
+Executing simulated annealing
+Initial solution done after 5.588 sec
+Built groups after 0.044 sec
+88687 iterations done after 1800.01 sec
+Algorithm took 1805.71 sec
+
+55777
+
+----------------------------------------
+../largeGraphs\largeRandom18.txt -- SIMANN
+Load took 0.316 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+571 Nodes from free components removed in articulation phase
+3060 Nodes removed from single connection components in articulation phase
+13 Unhappy nodes removed in second phase
+74 Unconnected nodes removed in second phase
+
+Reduce took 0.396 sec
+Executing simulated annealing
+Initial solution done after 5.604 sec
+Built groups after 0.044 sec
+94373 iterations done after 1800 sec
+Algorithm took 1805.78 sec
+
+55932
+
+----------------------------------------
+../largeGraphs\largeRandom19.txt -- SIMANN
+Load took 0.307 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+611 Nodes from free components removed in articulation phase
+3135 Nodes removed from single connection components in articulation phase
+10 Unhappy nodes removed in second phase
+73 Unconnected nodes removed in second phase
+
+Reduce took 0.394 sec
+Executing simulated annealing
+Initial solution done after 5.621 sec
+Built groups after 0.045 sec
+78350 iterations done after 1814.13 sec
+Algorithm took 1819.84 sec
+
+55799
+
+----------------------------------------
+../largeGraphs\largeRandom2.txt -- SIMANN
+Load took 0.499 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+628 Nodes from free components removed in articulation phase
+3132 Nodes removed from single connection components in articulation phase
+4 Unhappy nodes removed in second phase
+63 Unconnected nodes removed in second phase
+
+Reduce took 0.401 sec
+Executing simulated annealing
+Initial solution done after 5.561 sec
+Built groups after 0.044 sec
+69550 iterations done after 1836.78 sec
+Algorithm took 1842.41 sec
+
+55712
+
+----------------------------------------
+../largeGraphs\largeRandom20.txt -- SIMANN
+Load took 0.337 sec
+Articulation reduce stats: 
+2 Iterations in articulation phase
+599 Nodes from free components removed in articulation phase
+2945 Nodes removed from single connection components in articulation phase
+10 Unhappy nodes removed in second phase
+72 Unconnected nodes removed in second phase
+
+Reduce took 0.292 sec
+Executing simulated annealing
+Initial solution done after 5.646 sec
+Built groups after 0.045 sec
+79485 iterations done after 1800.02 sec
+Algorithm took 1805.8 sec
+
+55649
+
+----------------------------------------
+../largeGraphs\largeRandom3.txt -- SIMANN
+Load took 0.491 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+609 Nodes from free components removed in articulation phase
+3040 Nodes removed from single connection components in articulation phase
+6 Unhappy nodes removed in second phase
+67 Unconnected nodes removed in second phase
+
+Reduce took 0.397 sec
+Executing simulated annealing
+Initial solution done after 5.599 sec
+Built groups after 0.044 sec
+76844 iterations done after 1800.01 sec
+Algorithm took 1805.67 sec
+
+55588
+
+----------------------------------------
+../largeGraphs\largeRandom4.txt -- SIMANN
+Load took 0.397 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+619 Nodes from free components removed in articulation phase
+3100 Nodes removed from single connection components in articulation phase
+8 Unhappy nodes removed in second phase
+67 Unconnected nodes removed in second phase
+
+Reduce took 0.398 sec
+Executing simulated annealing
+Initial solution done after 5.571 sec
+Built groups after 0.042 sec
+79828 iterations done after 1880.04 sec
+Algorithm took 1885.71 sec
+
+55862
+
+----------------------------------------
+../largeGraphs\largeRandom5.txt -- SIMANN
+Load took 0.393 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+658 Nodes from free components removed in articulation phase
+3200 Nodes removed from single connection components in articulation phase
+12 Unhappy nodes removed in second phase
+66 Unconnected nodes removed in second phase
+
+Reduce took 0.404 sec
+Executing simulated annealing
+Initial solution done after 5.588 sec
+Built groups after 0.042 sec
+78498 iterations done after 1800.01 sec
+Algorithm took 1805.68 sec
+
+55793
+
+----------------------------------------
+../largeGraphs\largeRandom6.txt -- SIMANN
+Load took 0.382 sec
+Articulation reduce stats: 
+2 Iterations in articulation phase
+617 Nodes from free components removed in articulation phase
+3148 Nodes removed from single connection components in articulation phase
+10 Unhappy nodes removed in second phase
+48 Unconnected nodes removed in second phase
+
+Reduce took 0.296 sec
+Executing simulated annealing
+Initial solution done after 5.609 sec
+Built groups after 0.043 sec
+79273 iterations done after 1815.51 sec
+Algorithm took 1821.2 sec
+
+55769
+
+----------------------------------------
+../largeGraphs\largeRandom7.txt -- SIMANN
+Load took 0.38 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+610 Nodes from free components removed in articulation phase
+3109 Nodes removed from single connection components in articulation phase
+13 Unhappy nodes removed in second phase
+58 Unconnected nodes removed in second phase
+
+Reduce took 0.401 sec
+Executing simulated annealing
+Initial solution done after 5.763 sec
+Built groups after 0.042 sec
+77796 iterations done after 1805.62 sec
+Algorithm took 1811.46 sec
+
+55551
+
+----------------------------------------
+../largeGraphs\largeRandom8.txt -- SIMANN
+Load took 0.403 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+627 Nodes from free components removed in articulation phase
+3111 Nodes removed from single connection components in articulation phase
+15 Unhappy nodes removed in second phase
+70 Unconnected nodes removed in second phase
+
+Reduce took 0.396 sec
+Executing simulated annealing
+Initial solution done after 5.591 sec
+Built groups after 0.046 sec
+61945 iterations done after 1800 sec
+Algorithm took 1805.68 sec
+
+55625
+
+----------------------------------------
+../largeGraphs\largeRandom9.txt -- SIMANN
+Load took 0.36 sec
+Articulation reduce stats: 
+3 Iterations in articulation phase
+603 Nodes from free components removed in articulation phase
+3062 Nodes removed from single connection components in articulation phase
+4 Unhappy nodes removed in second phase
+67 Unconnected nodes removed in second phase
+
+Reduce took 0.597 sec
+Executing simulated annealing
+Initial solution done after 5.701 sec
+Built groups after 0.047 sec
+78333 iterations done after 1800.01 sec
+Algorithm took 1805.8 sec
+
+55648
+
+----------------------------------------
+../largeGraphs\largeScale1.txt -- SIMANN
+Load took 0.374 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+138 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.194 sec
+Executing simulated annealing
+Initial solution done after 10.429 sec
+Built groups after 0.048 sec
+33924 iterations done after 1800 sec
+Algorithm took 1810.51 sec
+
+54802
+
+----------------------------------------
+../largeGraphs\largeScale1.txt -- SIMANN
+Load took 0.285 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+138 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.225 sec
+Executing simulated annealing
+Initial solution done after 10.643 sec
+Built groups after 0.048 sec
+29411 iterations done after 1821.61 sec
+Algorithm took 1832.34 sec
+
+54802
+
+----------------------------------------
+../largeGraphs\largeScale10.txt -- SIMANN
+Load took 0.354 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+180 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.2 sec
+Executing simulated annealing
+Initial solution done after 10.511 sec
+Built groups after 0.05 sec
+70609 iterations done after 1800.02 sec
+Algorithm took 1810.64 sec
+
+54475
+
+----------------------------------------
+../largeGraphs\largeScale11.txt -- SIMANN
+Load took 0.408 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+167 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.199 sec
+Executing simulated annealing
+Initial solution done after 10.566 sec
+Built groups after 0.048 sec
+50750 iterations done after 1800.01 sec
+Algorithm took 1810.7 sec
+
+54593
+
+----------------------------------------
+../largeGraphs\largeScale12.txt -- SIMANN
+Load took 0.381 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+134 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.212 sec
+Executing simulated annealing
+Initial solution done after 10.524 sec
+Built groups after 0.051 sec
+44230 iterations done after 1800.01 sec
+Algorithm took 1810.63 sec
+
+55210
+
+----------------------------------------
+../largeGraphs\largeScale13.txt -- SIMANN
+Load took 0.36 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+143 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.205 sec
+Executing simulated annealing
+Initial solution done after 10.611 sec
+Built groups after 0.05 sec
+60495 iterations done after 1802.41 sec
+Algorithm took 1813.13 sec
+
+55075
+
+----------------------------------------
+../largeGraphs\largeScale14.txt -- SIMANN
+Load took 0.391 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+144 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.199 sec
+Executing simulated annealing
+Initial solution done after 10.529 sec
+Built groups after 0.051 sec
+45954 iterations done after 1802.5 sec
+Algorithm took 1813.1 sec
+
+54976
+
+----------------------------------------
+../largeGraphs\largeScale15.txt -- SIMANN
+Load took 0.369 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+183 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.199 sec
+Executing simulated annealing
+Initial solution done after 10.485 sec
+Built groups after 0.05 sec
+56433 iterations done after 1800.02 sec
+Algorithm took 1810.6 sec
+
+54269
+
+----------------------------------------
+../largeGraphs\largeScale16.txt -- SIMANN
+Load took 0.36 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+151 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.213 sec
+Executing simulated annealing
+Initial solution done after 10.571 sec
+Built groups after 0.049 sec
+46814 iterations done after 1800.01 sec
+Algorithm took 1810.66 sec
+
+55560
+
+----------------------------------------
+../largeGraphs\largeScale17.txt -- SIMANN
+Load took 0.364 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+148 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.198 sec
+Executing simulated annealing
+Initial solution done after 10.501 sec
+Built groups after 0.049 sec
+45550 iterations done after 1800.01 sec
+Algorithm took 1810.59 sec
+
+54531
+
+----------------------------------------
+../largeGraphs\largeScale18.txt -- SIMANN
+Load took 0.349 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+151 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.205 sec
+Executing simulated annealing
+Initial solution done after 10.604 sec
+Built groups after 0.052 sec
+46886 iterations done after 1800.01 sec
+Algorithm took 1810.69 sec
+
+55213
+
+----------------------------------------
+../largeGraphs\largeScale19.txt -- SIMANN
+Load took 0.339 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+154 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.2 sec
+Executing simulated annealing
+Initial solution done after 10.546 sec
+Built groups after 0.048 sec
+56482 iterations done after 1801.55 sec
+Algorithm took 1812.19 sec
+
+54586
+
+----------------------------------------
+../largeGraphs\largeScale2.txt -- SIMANN
+Load took 0.378 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+153 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.202 sec
+Executing simulated annealing
+Initial solution done after 10.554 sec
+Built groups after 0.049 sec
+54860 iterations done after 1800.01 sec
+Algorithm took 1810.64 sec
+
+54966
+
+----------------------------------------
+../largeGraphs\largeScale20.txt -- SIMANN
+Load took 0.351 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+143 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.199 sec
+Executing simulated annealing
+Initial solution done after 10.575 sec
+Built groups after 0.05 sec
+56182 iterations done after 1800 sec
+Algorithm took 1810.67 sec
+
+55200
+
+----------------------------------------
+../largeGraphs\largeScale3.txt -- SIMANN
+Load took 0.387 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+151 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.197 sec
+Executing simulated annealing
+Initial solution done after 10.56 sec
+Built groups after 0.049 sec
+34460 iterations done after 1827.87 sec
+Algorithm took 1838.51 sec
+
+55276
+
+----------------------------------------
+../largeGraphs\largeScale4.txt -- SIMANN
+Load took 0.424 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+148 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.279 sec
+Executing simulated annealing
+Initial solution done after 12.746 sec
+Built groups after 0.055 sec
+33679 iterations done after 1826.76 sec
+Algorithm took 1839.59 sec
+
+55258
+
+----------------------------------------
+../largeGraphs\largeScale5.txt -- SIMANN
+Load took 0.387 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+153 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.196 sec
+Executing simulated annealing
+Initial solution done after 10.504 sec
+Built groups after 0.049 sec
+61876 iterations done after 1800.01 sec
+Algorithm took 1810.6 sec
+
+55028
+
+----------------------------------------
+../largeGraphs\largeScale6.txt -- SIMANN
+Load took 0.296 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+136 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.198 sec
+Executing simulated annealing
+Initial solution done after 10.549 sec
+Built groups after 0.047 sec
+21526 iterations done after 1800.02 sec
+Algorithm took 1810.63 sec
+
+54491
+
+----------------------------------------
+../largeGraphs\largeScale7.txt -- SIMANN
+Load took 0.314 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+147 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.199 sec
+Executing simulated annealing
+Initial solution done after 10.524 sec
+Built groups after 0.051 sec
+51611 iterations done after 1800.01 sec
+Algorithm took 1810.63 sec
+
+55294
+
+----------------------------------------
+../largeGraphs\largeScale8.txt -- SIMANN
+Load took 0.398 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+120 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.198 sec
+Executing simulated annealing
+Initial solution done after 10.6 sec
+Built groups after 0.049 sec
+48972 iterations done after 1806.89 sec
+Algorithm took 1817.58 sec
+
+55040
+
+----------------------------------------
+../largeGraphs\largeScale9.txt -- SIMANN
+Load took 0.395 sec
+Articulation reduce stats: 
+1 Iterations in articulation phase
+0 Nodes from free components removed in articulation phase
+0 Nodes removed from single connection components in articulation phase
+125 Unhappy nodes removed in second phase
+0 Unconnected nodes removed in second phase
+
+Reduce took 0.198 sec
+Executing simulated annealing
+Initial solution done after 10.574 sec
+Built groups after 0.049 sec
+60401 iterations done after 1800.01 sec
+Algorithm took 1810.69 sec
+
+55504
+
